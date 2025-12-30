@@ -18,6 +18,7 @@ QQ 交流群1（已满）: [`926552981`](https://jq.qq.com/?_wv=1027&k=5zMDYHT) 
 - 🚀 [快速开始](examples/quick-start.sh) - 一键设置博客
 - 📖 [完整部署指南](DEPLOYMENT_GUIDE_CN.md) - 详细步骤
 - ✅ [部署检查清单](DEPLOYMENT_CHECKLIST.md) - 确保不漏步骤
+- 🔧 [主题更新指南](THEME_UPDATE_GUIDE.md) - 主题更新和维护
 
 ## 特性
 

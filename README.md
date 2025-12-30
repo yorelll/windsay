@@ -16,6 +16,7 @@ This theme provides complete Cloudflare Pages deployment solution with one-click
 - 🚀 [Quick Start Script](examples/quick-start.sh) - Automated setup
 - 📖 [Full Deployment Guide](DEPLOYMENT_GUIDE_CN.md) - Detailed steps (Chinese)
 - ✅ [Deployment Checklist](DEPLOYMENT_CHECKLIST.md) - Don't miss any steps
+- 🔧 [Theme Update Guide](THEME_UPDATE_GUIDE.md) - Update and maintain the theme
 
 ## Features
 

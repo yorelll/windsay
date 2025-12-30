@@ -21,6 +21,7 @@
 | [DEPLOYMENT_GUIDE_CN.md](DEPLOYMENT_GUIDE_CN.md) | 完整部署指南 | 所有用户 | 15 分钟 |
 | [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) | 部署检查清单 | 所有用户 | 5 分钟 |
 | [DEPLOYMENT_SUMMARY.md](DEPLOYMENT_SUMMARY.md) | 部署方案总结 | 想了解全局的用户 | 10 分钟 |
+| [THEME_UPDATE_GUIDE.md](THEME_UPDATE_GUIDE.md) | 主题更新维护指南 | 主题开发者/高级用户 | 20 分钟 |
 | [ARCHITECTURE_DIAGRAM.md](ARCHITECTURE_DIAGRAM.md) | 架构图和流程图 | 技术用户 | 5 分钟 |
 
 ### 示例和工具
@@ -47,6 +48,13 @@
 2. 参考 [示例配置文件](examples/blog-config/) 修改现有配置
 3. 复制 [GitHub Actions 工作流](examples/github-actions/deploy.yml)
 4. 按照 [部署指南](DEPLOYMENT_GUIDE_CN.md) 的第三、四步操作
+
+### 我想修改或更新主题
+
+1. 阅读 [主题更新维护指南](THEME_UPDATE_GUIDE.md)
+2. 了解主题与博客仓库的分离架构
+3. 学习如何更新主题、Fork 主题、或贡献代码
+4. 掌握版本管理和主题开发最佳实践
 
 ### 我想了解技术架构
 
@@ -200,14 +208,18 @@
 ### 主题更新流程
 
 ```
-1. git submodule update --remote themes/windsay
+1. cd themes/windsay
    ↓
-2. 测试本地预览
+2. git pull origin main
    ↓
-3. git add/commit/push
+3. 测试本地预览
    ↓
-4. 自动部署 ✅
+4. git add/commit/push
+   ↓
+5. 自动部署 ✅
 ```
+
+详细说明请查看 [主题更新维护指南](THEME_UPDATE_GUIDE.md)
 
 ## 💡 推荐阅读顺序
 
