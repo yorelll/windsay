@@ -204,25 +204,24 @@ fi
 
 echo ""
 echo "📋 复制示例配置文件..."
-THEME_PATH="themes/windsay"
 
 # 复制配置文件
-if [ -f "$THEME_PATH/examples/blog-config/_config.yml" ]; then
-    cp "$THEME_PATH/examples/blog-config/_config.yml" _config.yml
+if [ -f "$THEME_DIR/examples/blog-config/_config.yml" ]; then
+    cp "$THEME_DIR/examples/blog-config/_config.yml" _config.yml
     echo "✅ 已复制 _config.yml"
 else
     echo "⚠️  警告: 未找到示例配置文件，使用默认配置"
 fi
 
 # 复制 .gitignore
-if [ -f "$THEME_PATH/examples/blog-config/.gitignore" ]; then
-    cp "$THEME_PATH/examples/blog-config/.gitignore" .gitignore
+if [ -f "$THEME_DIR/examples/blog-config/.gitignore" ]; then
+    cp "$THEME_DIR/examples/blog-config/.gitignore" .gitignore
     echo "✅ 已复制 .gitignore"
 fi
 
 # 复制 .nvmrc
-if [ -f "$THEME_PATH/examples/blog-config/.nvmrc" ]; then
-    cp "$THEME_PATH/examples/blog-config/.nvmrc" .nvmrc
+if [ -f "$THEME_DIR/examples/blog-config/.nvmrc" ]; then
+    cp "$THEME_DIR/examples/blog-config/.nvmrc" .nvmrc
     echo "✅ 已复制 .nvmrc"
 fi
 
@@ -231,8 +230,8 @@ echo ""
 echo "🔧 设置 GitHub Actions..."
 mkdir -p .github/workflows
 
-if [ -f "$THEME_PATH/examples/github-actions/deploy.yml" ]; then
-    cp "$THEME_PATH/examples/github-actions/deploy.yml" .github/workflows/
+if [ -f "$THEME_DIR/examples/github-actions/deploy.yml" ]; then
+    cp "$THEME_DIR/examples/github-actions/deploy.yml" .github/workflows/
     echo "✅ 已复制部署工作流"
 fi
 
@@ -331,7 +330,7 @@ echo "• 清理缓存: npx hexo clean"
 echo "• 生成静态文件: npx hexo generate"
 echo ""
 echo "📖 详细文档:"
-echo "• 部署指南: $THEME_PATH/DEPLOYMENT_GUIDE_CN.md"
-echo "• 主题更新指南: $THEME_PATH/THEME_UPDATE_GUIDE.md"
-echo "• 文档索引: $THEME_PATH/DOCUMENTATION_INDEX.md"
+echo "• 部署指南: $THEME_DIR/DEPLOYMENT_GUIDE_CN.md"
+echo "• 主题更新指南: $THEME_DIR/THEME_UPDATE_GUIDE.md"
+echo "• 文档索引: $THEME_DIR/DOCUMENTATION_INDEX.md"
 echo ""
