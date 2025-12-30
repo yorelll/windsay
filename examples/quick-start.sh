@@ -75,11 +75,18 @@ fi
 echo "检测到 Hexo 版本: $HEXO_VERSION"
 
 # 使用 node 来更新 package.json 以保证 JSON 格式正确
-node -e "
+# 使用环境变量传递版本号以避免注入风险
+HEXO_VERSION="$HEXO_VERSION" node -e "
 try {
   const fs = require('fs');
+  const hexoVersion = process.env.HEXO_VERSION;
+  
+  if (!hexoVersion || !/^[\d.]+$/.test(hexoVersion)) {
+    throw new Error('Invalid Hexo version format: ' + hexoVersion);
+  }
+  
   const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  pkg.hexo = { version: '$HEXO_VERSION' };
+  pkg.hexo = { version: hexoVersion };
   pkg.private = true;
   pkg.scripts = {
     build: 'hexo clean && hexo generate',

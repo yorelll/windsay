@@ -65,8 +65,8 @@ echo "• .github/ - GitHub Actions 配置"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
-# 询问确认
-read -p "⚠️  确定要继续吗？[y/N] " -n 1 -r
+# 询问确认（只需输入单个字符 y 或 Y）
+read -p "⚠️  确定要继续吗？输入 y 继续，其他键取消 [y/N]: " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "❌ 清理已取消"
@@ -148,8 +148,14 @@ echo "  2. 预览博客: npm run server"
 echo "  3. 生成静态文件: npm run build"
 echo ""
 echo "如果你想完全删除此博客目录:"
-echo "  cd .."
-echo "  rm -rf $(basename "$TARGET_DIR")"
+# 安全地获取目录名并显示完整命令
+BLOG_DIR_NAME=$(basename "$TARGET_DIR")
+if [ -n "$BLOG_DIR_NAME" ] && [ "$BLOG_DIR_NAME" != "." ] && [ "$BLOG_DIR_NAME" != ".." ]; then
+    echo "  cd .."
+    echo "  rm -rf \"$BLOG_DIR_NAME\""
+else
+    echo "  请手动删除博客目录"
+fi
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
