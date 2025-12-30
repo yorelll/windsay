@@ -21,9 +21,81 @@
 - **deploy-wrangler.yml** - 使用 Wrangler CLI 的替代部署方法
 - **preview.yml** - Pull Request 预览部署
 
+## 快速开始工具
+
+### quick-start.sh - 一键创建博客
+
+自动化脚本，快速创建一个完整的 Hexo 博客项目，包含主题、配置和所有依赖。
+
+**使用方法:**
+
+```bash
+# 使用快速开始脚本（推荐）
+bash examples/quick-start.sh my-hexo-blog
+
+# 进入博客目录
+cd my-hexo-blog
+
+# 本地预览
+npm run server
+
+# 创建文章
+npm run new "文章标题"
+```
+
+**重要更新 (v2.0):**
+- ✅ 修复了 hexo 命令不可用的问题
+- ✅ 自动配置 package.json 以支持所有 hexo 命令
+- ✅ 添加了便捷的 npm scripts（`npm run server`, `npm run new` 等）
+- ✅ 提供了网络优化选项和重试机制
+
+### cleanup.sh - 清理博客资源
+
+用于清理 Hexo 博客项目的临时文件和依赖，释放磁盘空间。
+
+**使用方法:**
+
+```bash
+# 在博客目录内运行
+cd my-hexo-blog
+bash ../path/to/examples/cleanup.sh
+
+# 或指定目录
+bash examples/cleanup.sh my-hexo-blog
+```
+
+**清理内容:**
+- ✅ node_modules/ - npm 依赖包
+- ✅ package-lock.json / yarn.lock - 依赖锁文件
+- ✅ public/ - 生成的静态文件
+- ✅ db.json - Hexo 数据库
+- ✅ .deploy_git/ - 部署缓存
+
+**保留内容:**
+- ✅ source/ - 你的文章和页面
+- ✅ themes/ - 主题文件
+- ✅ _config.yml - 配置文件
+- ✅ package.json - 项目配置
+
 ## 使用方法
 
-### 1. 设置博客项目
+### 方法一：使用快速开始脚本（推荐）
+
+```bash
+# 克隆主题仓库
+git clone https://github.com/yorelll/windsay.git
+
+# 运行快速开始脚本
+cd windsay
+bash examples/quick-start.sh my-hexo-blog
+
+# 进入博客目录开始使用
+cd my-hexo-blog
+npm run server  # 本地预览
+npm run new "我的第一篇文章"  # 创建文章
+```
+
+### 方法二：手动设置博客项目
 
 ```bash
 # 创建博客目录
@@ -287,6 +359,39 @@ npx hexo new page "tags"
 npx hexo new page "about"
 npx hexo new page "friends"
 ```
+
+## 清理和维护
+
+### 清理博客资源
+
+如果你想清理 npm 依赖和临时文件以释放磁盘空间，可以使用 `cleanup.sh` 脚本：
+
+```bash
+# 在博客目录内运行
+cd my-hexo-blog
+bash /path/to/windsay/examples/cleanup.sh
+
+# 或指定博客目录
+bash examples/cleanup.sh /path/to/my-hexo-blog
+```
+
+清理后，你的文章、配置和主题文件都会保留，但需要重新运行 `npm install` 才能再次使用博客。
+
+### 完全删除博客
+
+如果你不再需要这个博客项目，可以直接删除整个目录：
+
+```bash
+# 先清理依赖（可选）
+cd my-hexo-blog
+bash /path/to/windsay/examples/cleanup.sh
+
+# 完全删除博客目录
+cd ..
+rm -rf my-hexo-blog
+```
+
+**注意**: 删除前请确保已备份重要内容！
 
 ## 更多信息
 

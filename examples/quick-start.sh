@@ -54,9 +54,62 @@ echo ""
 echo "📦 初始化 npm 项目..."
 npm init -y
 
+# 获取安装的 Hexo 版本并更新 package.json
 echo ""
 echo "📥 安装 Hexo 和必要依赖..."
 npm install hexo --save
+
+# 添加 hexo.version 字段到 package.json，这是 hexo 识别项目的关键
+# 检查 hexo 是否安装成功
+if [ ! -f "node_modules/hexo/package.json" ]; then
+    echo "❌ 错误: Hexo 安装失败，未找到 hexo 包"
+    exit 1
+fi
+
+HEXO_VERSION=$(node -p "require('./node_modules/hexo/package.json').version")
+if [ -z "$HEXO_VERSION" ]; then
+    echo "❌ 错误: 无法获取 Hexo 版本"
+    exit 1
+fi
+
+echo "检测到 Hexo 版本: $HEXO_VERSION"
+
+# 使用 node 来更新 package.json 以保证 JSON 格式正确
+# 使用环境变量传递版本号以避免注入风险
+HEXO_VERSION="$HEXO_VERSION" node -e "
+try {
+  const fs = require('fs');
+  const hexoVersion = process.env.HEXO_VERSION;
+  
+  // 严格验证版本号格式 (例如: 7.3.0, 8.1.1)
+  if (!hexoVersion || !/^\\d+(?:\\.\\d+)*$/.test(hexoVersion)) {
+    throw new Error('Invalid Hexo version format: ' + hexoVersion);
+  }
+  
+  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  pkg.hexo = { version: hexoVersion };
+  pkg.private = true;
+  pkg.scripts = {
+    build: 'hexo clean && hexo generate',
+    clean: 'hexo clean',
+    deploy: 'hexo deploy',
+    server: 'hexo server',
+    dev: 'hexo server --draft',
+    new: 'hexo new'
+  };
+  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+  console.log('✅ 已配置 package.json');
+} catch (error) {
+  console.error('❌ 错误: 更新 package.json 失败:', error.message);
+  process.exit(1);
+}
+"
+
+# 检查 package.json 更新是否成功
+if [ $? -ne 0 ]; then
+    echo "❌ 错误: package.json 配置失败"
+    exit 1
+fi
 npm install hexo-server --save
 npm install hexo-deployer-git --save
 npm install hexo-generator-archive --save
@@ -330,11 +383,15 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "💡 常用命令:"
-echo "• 本地预览: npx hexo server"
+echo "• 本地预览: npx hexo server 或 npm run server"
 echo "• 访问: http://localhost:4000"
-echo "• 创建新文章: npx hexo new \"文章标题\""
-echo "• 清理缓存: npx hexo clean"
-echo "• 生成静态文件: npx hexo generate"
+echo "• 创建新文章: npx hexo new \"文章标题\" 或 npm run new \"文章标题\""
+echo "• 清理缓存: npx hexo clean 或 npm run clean"
+echo "• 生成静态文件: npx hexo generate 或 npm run build"
+echo ""
+echo "🧹 清理和维护:"
+echo "• 清理依赖和临时文件: bash $THEME_DIR/examples/cleanup.sh"
+echo "  （释放磁盘空间，保留文章和配置）"
 echo ""
 echo "📖 详细文档:"
 echo "• 部署指南: $THEME_DIR/DEPLOYMENT_GUIDE_CN.md"
