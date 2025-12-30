@@ -2,17 +2,35 @@
 
 # Hexo 博客快速设置脚本
 # 用于快速创建一个新的 Hexo 博客项目，使用 windsay 主题
+# 
+# 重要说明:
+# - 此脚本创建的是博客仓库，不是主题仓库
+# - windsay 主题将作为 git 子模块添加
+# - 你需要创建一个新的 GitHub 仓库来存放博客内容（例如: windsay-blog）
 
 set -e
 
+# 配置变量
+THEME_REPO_HTTPS="https://github.com/yorelll/windsay"
+THEME_REPO_SSH="git@github.com:yorelll/windsay.git"
+THEME_DIR="themes/windsay"
+
 echo "🚀 Hexo 博客快速设置脚本"
 echo "=========================="
+echo ""
+echo "📝 注意事项:"
+echo "   • 此脚本将创建一个新的 Hexo 博客项目"
+echo "   • windsay 主题将作为 git 子模块添加"
+echo "   • 请在 GitHub 创建一个博客仓库 (例如: windsay-blog)"
+echo "   • 不要将博客内容提交到 windsay 主题仓库"
 echo ""
 
 # 检查参数
 if [ -z "$1" ]; then
     echo "用法: ./quick-start.sh <博客目录名>"
     echo "示例: ./quick-start.sh my-hexo-blog"
+    echo ""
+    echo "推荐的博客目录名: windsay-blog"
     exit 1
 fi
 
@@ -87,7 +105,48 @@ SCAFFOLD
 echo ""
 echo "🎨 添加 windsay 主题..."
 git init
-git submodule add https://github.com/yorelll/windsay.git themes/windsay
+
+# 尝试添加主题作为 git 子模块，包含重试逻辑
+echo "正在克隆主题仓库..."
+MAX_RETRIES=3
+RETRY_COUNT=0
+SUCCESS=false
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
+    if [ $RETRY_COUNT -gt 0 ]; then
+        echo "重试 ($RETRY_COUNT/$MAX_RETRIES)..."
+        sleep 2
+    fi
+    
+    if git submodule add "$THEME_REPO_HTTPS" "$THEME_DIR"; then
+        SUCCESS=true
+        echo "✅ 主题克隆成功"
+    else
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+            echo "⚠️  克隆失败，将重试..."
+        fi
+    fi
+done
+
+if [ "$SUCCESS" = false ]; then
+    echo ""
+    echo "❌ 错误: 无法克隆主题仓库"
+    echo ""
+    echo "可能的原因和解决方案:"
+    echo "1. 网络连接问题 - 请检查网络连接并重试"
+    echo "2. GitHub 访问问题 - 可以尝试使用 SSH URL:"
+    echo "   git submodule add $THEME_REPO_SSH $THEME_DIR"
+    echo "3. 防火墙或代理问题 - 请配置 git 代理或更换网络环境"
+    echo ""
+    echo "手动解决方法:"
+    echo "1. cd $BLOG_DIR"
+    echo "2. git submodule add $THEME_REPO_HTTPS $THEME_DIR"
+    echo "   或者"
+    echo "   git clone $THEME_REPO_HTTPS $THEME_DIR"
+    echo ""
+    exit 1
+fi
 
 echo ""
 echo "📋 复制示例配置文件..."
@@ -166,17 +225,53 @@ echo "[]" > source/_data/friends.json
 echo ""
 echo "✅ 设置完成！"
 echo ""
-echo "接下来的步骤:"
+echo "📚 重要说明:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "1️⃣  仓库分离架构"
+echo "   • 主题仓库: https://github.com/yorelll/windsay"
+echo "   • 博客仓库: 你需要创建一个新仓库存放博客内容"
+echo "   • 建议博客仓库名: windsay-blog 或 my-hexo-blog"
+echo ""
+echo "2️⃣  主题作为子模块"
+echo "   • windsay 主题已作为 git 子模块添加到 themes/windsay"
+echo "   • 可独立更新主题，不影响博客内容"
+echo "   • 主题更新命令: cd themes/windsay && git pull origin main"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "🚀 接下来的步骤:"
 echo "1. cd $BLOG_DIR"
 echo "2. 编辑 _config.yml 修改网站信息和域名"
 echo "3. 编辑 .github/workflows/deploy.yml 修改 Cloudflare 项目名"
-echo "4. 在 GitHub 创建远程仓库"
-echo "5. 设置 GitHub Secrets (CLOUDFLARE_API_TOKEN 和 CLOUDFLARE_ACCOUNT_ID)"
-echo "6. git add . && git commit -m \"Initial commit\""
-echo "7. git remote add origin <你的仓库URL>"
-echo "8. git push -u origin main"
 echo ""
-echo "本地预览: npx hexo server"
-echo "访问: http://localhost:4000"
+echo "4. 在 GitHub 创建博客仓库（例如: windsay-blog）"
+echo "   访问: https://github.com/new"
+echo "   • 仓库名称: windsay-blog（推荐）或其他名称"
+echo "   • 设置为 Public"
+echo "   • 不要初始化 README、.gitignore 或 license"
 echo ""
-echo "📚 详细文档请查看: $THEME_PATH/DEPLOYMENT_GUIDE_CN.md"
+echo "5. 设置 GitHub Secrets"
+echo "   仓库 Settings → Secrets and variables → Actions"
+echo "   添加: CLOUDFLARE_API_TOKEN 和 CLOUDFLARE_ACCOUNT_ID"
+echo ""
+echo "6. 提交并推送到 GitHub"
+echo "   git add ."
+echo "   git commit -m \"Initial commit: Setup Hexo blog with windsay theme\""
+echo "   git branch -M main"
+echo "   git remote add origin https://github.com/你的用户名/windsay-blog.git"
+echo "   git push -u origin main"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "💡 常用命令:"
+echo "• 本地预览: npx hexo server"
+echo "• 访问: http://localhost:4000"
+echo "• 创建新文章: npx hexo new \"文章标题\""
+echo "• 清理缓存: npx hexo clean"
+echo "• 生成静态文件: npx hexo generate"
+echo ""
+echo "📖 详细文档:"
+echo "• 部署指南: $THEME_PATH/DEPLOYMENT_GUIDE_CN.md"
+echo "• 主题更新指南: $THEME_PATH/THEME_UPDATE_GUIDE.md"
+echo "• 文档索引: $THEME_PATH/DOCUMENTATION_INDEX.md"
+echo ""

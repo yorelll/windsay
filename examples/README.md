@@ -166,6 +166,106 @@ cp path/to/windsay/examples/github-actions/preview.yml .github/workflows/
 2. 确保 Cloudflare Pages 项目已创建
 3. 检查工作流权限设置
 
+### 网络和克隆问题
+
+#### 问题：TLS 连接错误
+
+如果在运行 `quick-start.sh` 时遇到类似错误：
+```
+fatal: unable to access 'https://github.com/yorelll/windsay.git/': 
+GnuTLS recv error (-110): The TLS connection was non-properly terminated.
+```
+
+**解决方案**：
+
+1. **使用快速开始脚本的重试功能**
+   ```bash
+   # 脚本会自动重试 3 次
+   bash examples/quick-start.sh my-blog
+   ```
+
+2. **检查网络连接**
+   ```bash
+   ping github.com
+   curl -I https://github.com
+   ```
+
+3. **使用 SSH 克隆（推荐）**
+   
+   编辑 `quick-start.sh` 或手动操作：
+   ```bash
+   # 确保已配置 SSH 密钥
+   git submodule add git@github.com:yorelll/windsay.git themes/windsay
+   ```
+
+4. **配置 Git 使用代理**
+   ```bash
+   # HTTP 代理
+   git config --global http.proxy http://proxy.example.com:8080
+   
+   # SOCKS5 代理
+   git config --global http.proxy socks5://127.0.0.1:1080
+   ```
+
+5. **增加超时时间**
+   ```bash
+   git config --global http.postBuffer 524288000
+   git config --global http.lowSpeedLimit 0
+   git config --global http.lowSpeedTime 999999
+   ```
+
+6. **直接克隆（非子模块方式）**
+   ```bash
+   cd my-blog
+   git clone https://github.com/yorelll/windsay themes/windsay
+   ```
+
+7. **手动下载主题**
+   ```bash
+   # 下载 ZIP 文件
+   wget https://github.com/yorelll/windsay/archive/refs/heads/main.zip
+   unzip main.zip
+   mv windsay-main themes/windsay
+   ```
+
+#### 问题：子模块初始化失败
+
+**症状**：`themes/windsay` 目录存在但为空
+
+**解决方案**：
+```bash
+# 初始化并更新子模块
+git submodule init
+git submodule update
+
+# 或一次性命令
+git submodule update --init --recursive
+```
+
+#### 问题：快速开始脚本中断
+
+**症状**：脚本执行到一半停止
+
+**解决方案**：
+```bash
+# 1. 进入已创建的目录
+cd my-blog
+
+# 2. 手动完成剩余步骤
+# 如果主题未克隆
+git submodule add https://github.com/yorelll/windsay themes/windsay
+
+# 如果配置文件未复制
+cp themes/windsay/examples/blog-config/_config.yml .
+cp themes/windsay/examples/blog-config/.gitignore .
+
+# 如果页面未创建
+npx hexo new page "categories"
+npx hexo new page "tags"
+npx hexo new page "about"
+npx hexo new page "friends"
+```
+
 ## 更多信息
 
 详细的部署指南请参考 [DEPLOYMENT_GUIDE_CN.md](../DEPLOYMENT_GUIDE_CN.md)
