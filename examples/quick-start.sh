@@ -195,8 +195,8 @@ if [ "$SUCCESS" = false ]; then
     echo ""
     echo "手动解决方法:"
     echo "1. cd $BLOG_DIR"
-    echo "2. git submodule add --depth 1 $THEME_REPO_HTTPS $THEME_DIR"
-    echo "   或者使用完整克隆:"
+    echo "2. git submodule add $THEME_REPO_HTTPS $THEME_DIR"
+    echo "   或者使用浅克隆直接克隆（非子模块）:"
     echo "   git clone --depth 1 $THEME_REPO_HTTPS $THEME_DIR"
     echo ""
     exit 1
