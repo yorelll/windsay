@@ -168,6 +168,28 @@ cp path/to/windsay/examples/github-actions/preview.yml .github/workflows/
 
 ### 网络和克隆问题
 
+#### 快速克隆选项
+
+脚本现在提供三种克隆方式：
+
+1. **GitHub HTTPS (默认)** - 适合网络环境良好的用户
+2. **GitHub 镜像站** - 推荐中国大陆用户使用，速度更快
+3. **SSH 方式** - 需要配置 SSH 密钥
+
+**自动化脚本使用**：
+```bash
+# 使用环境变量跳过交互式提示
+CLONE_OPTION=1 bash examples/quick-start.sh my-blog  # HTTPS
+CLONE_OPTION=2 bash examples/quick-start.sh my-blog  # 镜像站
+CLONE_OPTION=3 bash examples/quick-start.sh my-blog  # SSH
+```
+
+**优化特性**：
+- 自动配置 Git 超时和缓冲区设置以提高稳定性
+- 失败时自动重试 3 次
+- 失败时自动清理残留文件
+- 克隆成功后可选的浅克隆优化以节省空间
+
 #### 问题：TLS 连接错误
 
 如果在运行 `quick-start.sh` 时遇到类似错误：

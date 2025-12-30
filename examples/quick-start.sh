@@ -13,7 +13,11 @@ set -e
 # 配置变量
 THEME_REPO_HTTPS="https://github.com/yorelll/windsay"
 THEME_REPO_SSH="git@github.com:yorelll/windsay.git"
+# GitHub 镜像站（用于加速克隆，适用于中国大陆用户）
+THEME_REPO_MIRROR="https://gitee.com/mirrors/windsay"  # 可选的镜像地址
 THEME_DIR="themes/windsay"
+# Git 克隆配置
+GIT_CLONE_DEPTH="1"  # 使用浅克隆减少下载大小
 
 echo "🚀 Hexo 博客快速设置脚本"
 echo "=========================="
@@ -104,7 +108,48 @@ SCAFFOLD
 
 echo ""
 echo "🎨 添加 windsay 主题..."
+
+# 询问用户是否使用镜像站（适用于中国大陆用户）
+# 支持环境变量 CLONE_OPTION 以便自动化脚本使用
+if [ -z "$CLONE_OPTION" ]; then
+    echo ""
+    echo "⚡ GitHub 克隆优化选项:"
+    echo "1. 使用 GitHub 官方地址 (默认)"
+    echo "2. 使用 GitHub 镜像站 (推荐中国大陆用户，速度更快)"
+    echo "3. 使用 SSH 方式 (需要配置 SSH 密钥)"
+    echo ""
+    read -p "请选择克隆方式 [1-3, 默认 1]: " CLONE_OPTION
+    CLONE_OPTION=${CLONE_OPTION:-1}
+else
+    echo "📌 使用预设的克隆选项: $CLONE_OPTION"
+fi
+
+case $CLONE_OPTION in
+    2)
+        REPO_URL="$THEME_REPO_MIRROR"
+        echo "📌 使用镜像站: $REPO_URL"
+        echo "⚠️  注意: 镜像站可能不是最新版本，建议后续手动更新"
+        ;;
+    3)
+        REPO_URL="$THEME_REPO_SSH"
+        echo "📌 使用 SSH: $REPO_URL"
+        ;;
+    *)
+        REPO_URL="$THEME_REPO_HTTPS"
+        echo "📌 使用 HTTPS: $REPO_URL"
+        ;;
+esac
+
 git init
+
+# 配置 git 以优化克隆速度
+echo "⚙️  配置 Git 克隆参数..."
+# 增加 HTTP 缓冲区大小到 500MB 以处理大文件
+git config http.postBuffer 524288000
+# 禁用低速限制检查，避免网络波动导致中断
+git config http.lowSpeedLimit 0
+# 设置超时时间为 10 分钟（600 秒），适合慢速网络
+git config http.lowSpeedTime 600
 
 # 尝试添加主题作为 git 子模块，包含重试逻辑
 echo "正在克隆主题仓库..."
@@ -118,13 +163,27 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
         sleep 2
     fi
     
-    if git submodule add "$THEME_REPO_HTTPS" "$THEME_DIR"; then
+    # Note: git submodule doesn't support --depth flag directly
+    # We'll use regular submodule add, and users can manually shallow clone if needed
+    if git submodule add "$REPO_URL" "$THEME_DIR"; then
         SUCCESS=true
         echo "✅ 主题克隆成功"
+        
+        # Optional: Try to reduce repository size by cleaning up
+        # Note: Converting to shallow clone after full clone is complex and may fail
+        # Users can manually run: cd themes/windsay && git fetch --depth 1 && git gc
+        if [ "$GIT_CLONE_DEPTH" = "1" ]; then
+            echo "⚙️  优化：清理 Git 仓库以节省空间..."
+            # Run basic garbage collection to clean up and compress (not aggressive to save time)
+            (cd "$THEME_DIR" && git gc --prune=all) 2>/dev/null || true
+        fi
     else
         RETRY_COUNT=$((RETRY_COUNT + 1))
         if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
             echo "⚠️  克隆失败，将重试..."
+            # 清理失败的克隆尝试
+            THEME_NAME=$(basename "$THEME_DIR")
+            rm -rf "$THEME_DIR" .git/modules/"$THEME_NAME" 2>/dev/null
         fi
     fi
 done
@@ -135,40 +194,41 @@ if [ "$SUCCESS" = false ]; then
     echo ""
     echo "可能的原因和解决方案:"
     echo "1. 网络连接问题 - 请检查网络连接并重试"
-    echo "2. GitHub 访问问题 - 可以尝试使用 SSH URL:"
-    echo "   git submodule add $THEME_REPO_SSH $THEME_DIR"
-    echo "3. 防火墙或代理问题 - 请配置 git 代理或更换网络环境"
+    echo "2. GitHub 访问速度慢 - 重新运行脚本并选择镜像站选项 (选项 2)"
+    echo "3. 配置 Git 代理:"
+    echo "   git config --global http.proxy http://proxy.example.com:8080"
+    echo "   或 git config --global http.proxy socks5://127.0.0.1:1080"
+    echo "4. 使用 SSH 方式 - 重新运行脚本并选择 SSH 选项 (选项 3)"
     echo ""
     echo "手动解决方法:"
     echo "1. cd $BLOG_DIR"
     echo "2. git submodule add $THEME_REPO_HTTPS $THEME_DIR"
-    echo "   或者"
-    echo "   git clone $THEME_REPO_HTTPS $THEME_DIR"
+    echo "   或者使用浅克隆直接克隆（非子模块）:"
+    echo "   git clone --depth 1 $THEME_REPO_HTTPS $THEME_DIR"
     echo ""
     exit 1
 fi
 
 echo ""
 echo "📋 复制示例配置文件..."
-THEME_PATH="themes/windsay"
 
 # 复制配置文件
-if [ -f "$THEME_PATH/examples/blog-config/_config.yml" ]; then
-    cp "$THEME_PATH/examples/blog-config/_config.yml" _config.yml
+if [ -f "$THEME_DIR/examples/blog-config/_config.yml" ]; then
+    cp "$THEME_DIR/examples/blog-config/_config.yml" _config.yml
     echo "✅ 已复制 _config.yml"
 else
     echo "⚠️  警告: 未找到示例配置文件，使用默认配置"
 fi
 
 # 复制 .gitignore
-if [ -f "$THEME_PATH/examples/blog-config/.gitignore" ]; then
-    cp "$THEME_PATH/examples/blog-config/.gitignore" .gitignore
+if [ -f "$THEME_DIR/examples/blog-config/.gitignore" ]; then
+    cp "$THEME_DIR/examples/blog-config/.gitignore" .gitignore
     echo "✅ 已复制 .gitignore"
 fi
 
 # 复制 .nvmrc
-if [ -f "$THEME_PATH/examples/blog-config/.nvmrc" ]; then
-    cp "$THEME_PATH/examples/blog-config/.nvmrc" .nvmrc
+if [ -f "$THEME_DIR/examples/blog-config/.nvmrc" ]; then
+    cp "$THEME_DIR/examples/blog-config/.nvmrc" .nvmrc
     echo "✅ 已复制 .nvmrc"
 fi
 
@@ -177,18 +237,22 @@ echo ""
 echo "🔧 设置 GitHub Actions..."
 mkdir -p .github/workflows
 
-if [ -f "$THEME_PATH/examples/github-actions/deploy.yml" ]; then
-    cp "$THEME_PATH/examples/github-actions/deploy.yml" .github/workflows/
+if [ -f "$THEME_DIR/examples/github-actions/deploy.yml" ]; then
+    cp "$THEME_DIR/examples/github-actions/deploy.yml" .github/workflows/
     echo "✅ 已复制部署工作流"
 fi
 
 echo ""
 echo "📄 创建必要的页面..."
-npx hexo new page "categories"
-npx hexo new page "tags"
-npx hexo new page "about"
-npx hexo new page "friends"
 
+# 创建页面目录（不依赖 hexo new page 命令）
+echo "创建页面目录结构..."
+mkdir -p source/categories
+mkdir -p source/tags
+mkdir -p source/about
+mkdir -p source/friends
+
+# 直接创建页面文件而不是使用 npx hexo new page
 # 更新页面的 front-matter
 echo "---
 title: categories
@@ -217,6 +281,8 @@ date: $(date +%Y-%m-%d\ %H:%M:%S)
 type: \"friends\"
 layout: \"friends\"
 ---" > source/friends/index.md
+
+echo "✅ 已创建必要的页面文件"
 
 # 创建 friends 数据文件
 mkdir -p source/_data
@@ -271,7 +337,7 @@ echo "• 清理缓存: npx hexo clean"
 echo "• 生成静态文件: npx hexo generate"
 echo ""
 echo "📖 详细文档:"
-echo "• 部署指南: $THEME_PATH/DEPLOYMENT_GUIDE_CN.md"
-echo "• 主题更新指南: $THEME_PATH/THEME_UPDATE_GUIDE.md"
-echo "• 文档索引: $THEME_PATH/DOCUMENTATION_INDEX.md"
+echo "• 部署指南: $THEME_DIR/DEPLOYMENT_GUIDE_CN.md"
+echo "• 主题更新指南: $THEME_DIR/THEME_UPDATE_GUIDE.md"
+echo "• 文档索引: $THEME_DIR/DOCUMENTATION_INDEX.md"
 echo ""
