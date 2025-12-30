@@ -1,0 +1,54 @@
+name: Preview Deployment
+
+# 为 Pull Request 创建预览部署
+# 可以在合并前预览更改
+# 注意: Cloudflare Pages 会自动管理预览分支，无需手动清理
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Dependencies
+      run: npm ci
+    
+    - name: Build
+      run: npm run build
+    
+    - name: Deploy Preview to Cloudflare Pages
+      uses: cloudflare/pages-action@v1
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        projectName: windsay-blog
+        directory: public
+        gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        branch: preview-${{ github.event.pull_request.number }}
+    
+    - name: Comment PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '✅ Preview deployment is ready! Check the Cloudflare Pages dashboard for the preview URL.'
+          })

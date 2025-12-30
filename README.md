@@ -6,6 +6,17 @@
 
 > This is a Hexo blog theme with 'Material Design' and responsive design.
 
+## 📚 Cloudflare Pages Deployment
+
+This theme provides complete Cloudflare Pages deployment solution with one-click publishing!
+
+**👉 [View Complete Documentation Index](DOCUMENTATION_INDEX.md)** for all available guides
+
+**Quick Links**:
+- 🚀 [Quick Start Script](examples/quick-start.sh) - Automated setup
+- 📖 [Full Deployment Guide](DEPLOYMENT_GUIDE_CN.md) - Detailed steps (Chinese)
+- ✅ [Deployment Checklist](DEPLOYMENT_CHECKLIST.md) - Don't miss any steps
+
 ## Features
 
 - Simple and beautiful, and post is Beautiful and readable.
@@ -662,3 +673,31 @@ There are 24 featured pictures in `/source/medias/featureimages`, you can add or
 ## Changelog
 
 See [CHANGELOG.md](https://github.com/blinkfox/hexo-theme-matery/blob/master/CHANGELOG.md)
+
+## Deployment Options
+
+### Cloudflare Pages Deployment (Recommended)
+
+This theme provides a complete Cloudflare Pages deployment guide with one-click publishing support:
+
+- 📖 **[Complete Deployment Guide](DEPLOYMENT_GUIDE_CN.md)** - Detailed step-by-step instructions (Chinese)
+- 🚀 **[Quick Start Script](examples/quick-start.sh)** - Automated setup tool
+- 📋 **[Example Configuration Files](examples/)** - Blog config and GitHub Actions templates
+
+**Features**:
+- ✅ Auto-deploy on `git push`
+- ✅ Global CDN acceleration
+- ✅ Free SSL certificates
+- ✅ Custom domain support
+- ✅ Pull Request preview deployments
+
+**Quick Start**:
+
+```bash
+# Using the quick start script
+bash examples/quick-start.sh my-hexo-blog
+
+# Or manual setup, see the complete guide
+```
+
+For other deployment options, please refer to the [Chinese README](README_CN.md).
