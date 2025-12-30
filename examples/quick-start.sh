@@ -2,17 +2,30 @@
 
 # Hexo 博客快速设置脚本
 # 用于快速创建一个新的 Hexo 博客项目，使用 windsay 主题
+# 
+# 重要说明:
+# - 此脚本创建的是博客仓库，不是主题仓库
+# - windsay 主题将作为 git 子模块添加
+# - 你需要创建一个新的 GitHub 仓库来存放博客内容（例如: windsay-blog）
 
 set -e
 
 echo "🚀 Hexo 博客快速设置脚本"
 echo "=========================="
 echo ""
+echo "📝 注意事项:"
+echo "   • 此脚本将创建一个新的 Hexo 博客项目"
+echo "   • windsay 主题将作为 git 子模块添加"
+echo "   • 请在 GitHub 创建一个博客仓库 (例如: windsay-blog)"
+echo "   • 不要将博客内容提交到 windsay 主题仓库"
+echo ""
 
 # 检查参数
 if [ -z "$1" ]; then
     echo "用法: ./quick-start.sh <博客目录名>"
     echo "示例: ./quick-start.sh my-hexo-blog"
+    echo ""
+    echo "推荐的博客目录名: windsay-blog"
     exit 1
 fi
 
