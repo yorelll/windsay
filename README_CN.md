@@ -686,7 +686,31 @@ $('.bg-cover').css('background-image', 'url(/medias/banner/' + new Date().getDay
 
 > Jsdelivr 已经被封了，这两个可以加速访问快一点
 
-### [vercel 部署](https://blog.17lai.site/posts/5311b619/#vercel-%E9%83%A8%E7%BD%B2)
+### Cloudflare Pages 部署（推荐）
 
-### [cloudflare Pages 部署](https://blog.17lai.site/posts/5311b619/#cloudflare-Pages-%E9%83%A8%E7%BD%B2)
+本主题提供完整的 Cloudflare Pages 部署指南，支持一键发布：
+
+- 📖 **[完整部署指南](DEPLOYMENT_GUIDE_CN.md)** - 详细的步骤说明
+- 🚀 **[快速开始脚本](examples/quick-start.sh)** - 自动化设置工具
+- 📋 **[示例配置文件](examples/)** - 博客配置和 GitHub Actions 模板
+
+**特点**:
+- ✅ 本地 `git push` 自动部署
+- ✅ 全球 CDN 加速
+- ✅ 免费 SSL 证书
+- ✅ 支持自定义域名
+- ✅ Pull Request 预览部署
+
+**快速开始**:
+
+```bash
+# 使用快速开始脚本
+bash examples/quick-start.sh my-hexo-blog
+
+# 或手动设置，参见完整指南
+```
+
+### [Vercel 部署](https://blog.17lai.site/posts/5311b619/#vercel-%E9%83%A8%E7%BD%B2)
+
+### [其他 Cloudflare Pages 部署参考](https://blog.17lai.site/posts/5311b619/#cloudflare-Pages-%E9%83%A8%E7%BD%B2)
 

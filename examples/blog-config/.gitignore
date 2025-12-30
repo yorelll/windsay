@@ -1,0 +1,17 @@
+.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.deploy_git/
+.history
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

@@ -1,0 +1,171 @@
+# 博客配置文件和 GitHub Actions 示例
+
+本目录包含用于设置 Hexo 博客并部署到 Cloudflare Pages 的示例配置文件。
+
+## 文件说明
+
+### blog-config/ - 博客配置文件
+
+用于你的博客仓库根目录的配置文件：
+
+- **_config.yml** - Hexo 主配置文件
+- **package.json** - npm 依赖配置
+- **.gitignore** - Git 忽略文件配置
+- **.nvmrc** - Node.js 版本配置
+
+### github-actions/ - GitHub Actions 工作流
+
+用于自动化部署的 GitHub Actions 配置（放在博客仓库的 `.github/workflows/` 目录）：
+
+- **deploy.yml** - 主部署工作流（推荐使用）
+- **deploy-wrangler.yml** - 使用 Wrangler CLI 的替代部署方法
+- **preview.yml** - Pull Request 预览部署
+
+## 使用方法
+
+### 1. 设置博客项目
+
+```bash
+# 创建博客目录
+mkdir my-hexo-blog
+cd my-hexo-blog
+
+# 复制配置文件
+cp path/to/windsay/examples/blog-config/* .
+
+# 安装依赖
+npm install
+
+# 初始化 Hexo
+hexo init .
+
+# 添加主题为子模块
+git submodule add https://github.com/yorelll/windsay.git themes/windsay
+```
+
+### 2. 设置 GitHub Actions
+
+```bash
+# 创建工作流目录
+mkdir -p .github/workflows
+
+# 复制部署工作流
+cp path/to/windsay/examples/github-actions/deploy.yml .github/workflows/
+
+# 可选：复制预览部署工作流
+cp path/to/windsay/examples/github-actions/preview.yml .github/workflows/
+```
+
+### 3. 配置 GitHub Secrets
+
+在你的 GitHub 仓库中设置以下 secrets：
+
+1. 进入仓库 Settings → Secrets and variables → Actions
+2. 添加 secrets：
+   - `CLOUDFLARE_API_TOKEN`
+   - `CLOUDFLARE_ACCOUNT_ID`
+
+### 4. 修改配置
+
+编辑以下文件中的配置：
+
+- **_config.yml**: 修改 `url` 为你的域名
+- **deploy.yml**: 修改 `projectName` 为你的 Cloudflare Pages 项目名
+- **package.json**: 修改 `name`、`author` 等信息
+
+## 工作流说明
+
+### deploy.yml（主部署工作流）
+
+**触发条件**:
+- 推送到 main 分支
+- 手动触发
+
+**功能**:
+1. 检出代码和子模块
+2. 设置 Node.js 环境
+3. 安装依赖
+4. 构建 Hexo 站点
+5. 部署到 Cloudflare Pages
+
+### deploy-wrangler.yml（替代部署方法）
+
+使用 Cloudflare Wrangler CLI 直接部署，提供更多自定义选项。
+
+### preview.yml（预览部署）
+
+**触发条件**:
+- Pull Request 到 main 分支
+
+**功能**:
+1. 构建预览版本
+2. 部署到单独的预览环境
+3. 在 PR 中添加评论
+
+## 注意事项
+
+1. **子模块**: 确保在 `Checkout` 步骤中启用 `submodules: true`
+2. **Node.js 版本**: 使用 Node.js 18 以保证兼容性
+3. **缓存**: GitHub Actions 会自动缓存 npm 依赖以加速构建
+4. **分支名称**: 根据你的仓库修改默认分支名称（main 或 master）
+
+## 自定义
+
+### 修改构建命令
+
+在 `package.json` 中自定义构建脚本：
+
+```json
+{
+  "scripts": {
+    "build": "hexo clean && hexo generate",
+    "build:prod": "hexo clean && hexo generate --config _config.yml,_config.prod.yml"
+  }
+}
+```
+
+### 添加环境变量
+
+在工作流文件中添加环境变量：
+
+```yaml
+- name: Build
+  env:
+    NODE_ENV: production
+    HEXO_ENV: production
+  run: npm run build
+```
+
+### 自定义部署分支
+
+```yaml
+- name: Publish to Cloudflare Pages
+  uses: cloudflare/pages-action@v1
+  with:
+    # ... 其他配置
+    branch: production  # 自定义分支名
+```
+
+## 故障排除
+
+### 构建失败
+
+1. 检查 Node.js 版本是否正确
+2. 确保所有依赖都在 `package.json` 中
+3. 查看构建日志中的错误信息
+
+### 主题未加载
+
+1. 确保子模块已正确添加
+2. 检查 `_config.yml` 中的 `theme: windsay` 配置
+3. 验证 `themes/windsay` 目录存在
+
+### 部署失败
+
+1. 验证 Cloudflare API Token 和 Account ID
+2. 确保 Cloudflare Pages 项目已创建
+3. 检查工作流权限设置
+
+## 更多信息
+
+详细的部署指南请参考 [DEPLOYMENT_GUIDE_CN.md](../DEPLOYMENT_GUIDE_CN.md)

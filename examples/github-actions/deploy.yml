@@ -1,0 +1,43 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches:
+      - main  # 修改为你的默认分支名称（main 或 master）
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true  # 重要：拉取主题子模块
+        fetch-depth: 0    # 获取所有历史记录
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install Dependencies
+      run: |
+        npm ci
+    
+    - name: Build Hexo Site
+      run: |
+        npm run build
+    
+    - name: Publish to Cloudflare Pages
+      uses: cloudflare/pages-action@v1
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        projectName: windsay-blog  # 修改为你的 Cloudflare Pages 项目名
+        directory: public
+        gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
+        wranglerVersion: '3'
