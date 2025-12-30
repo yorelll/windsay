@@ -149,7 +149,7 @@ git config http.lowSpeedLimit 0
 git config http.lowSpeedTime 999999
 
 # 尝试添加主题作为 git 子模块，包含重试逻辑
-echo "正在克隆主题仓库（使用浅克隆加速）..."
+echo "正在克隆主题仓库..."
 MAX_RETRIES=3
 RETRY_COUNT=0
 SUCCESS=false
@@ -160,17 +160,23 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
         sleep 2
     fi
     
-    # 使用浅克隆减少下载大小
-    if git submodule add --depth "$GIT_CLONE_DEPTH" "$REPO_URL" "$THEME_DIR" 2>/dev/null || \
-       git submodule add "$REPO_URL" "$THEME_DIR"; then
+    # Note: git submodule doesn't support --depth flag directly
+    # We'll use regular submodule add, and users can manually shallow clone if needed
+    if git submodule add "$REPO_URL" "$THEME_DIR"; then
         SUCCESS=true
         echo "✅ 主题克隆成功"
+        
+        # Try to convert to shallow clone to save space (optional optimization)
+        if [ "$GIT_CLONE_DEPTH" = "1" ]; then
+            echo "⚙️  优化：转换为浅克隆以节省空间..."
+            (cd "$THEME_DIR" && git fetch --depth 1 && git gc --prune=all) 2>/dev/null || true
+        fi
     else
         RETRY_COUNT=$((RETRY_COUNT + 1))
         if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
             echo "⚠️  克隆失败，将重试..."
             # 清理失败的克隆尝试
-            rm -rf "$THEME_DIR" .git/modules/themes/windsay 2>/dev/null
+            rm -rf "$THEME_DIR" .git/modules/"$THEME_DIR" 2>/dev/null
         fi
     fi
 done
