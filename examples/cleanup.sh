@@ -29,9 +29,14 @@ if [ ! -d "$TARGET_DIR" ]; then
 fi
 
 # 检查是否是 Hexo 项目
+# 一个有效的 Hexo 博客目录应该至少有 _config.yml 或 package.json
 if [ ! -f "$TARGET_DIR/_config.yml" ] && [ ! -f "$TARGET_DIR/package.json" ]; then
     echo "❌ 错误: '$TARGET_DIR' 似乎不是一个 Hexo 博客目录"
-    echo "   (未找到 _config.yml 或 package.json)"
+    echo "   (未找到 _config.yml 和 package.json)"
+    echo ""
+    echo "💡 提示: Hexo 博客目录应该至少包含以下之一:"
+    echo "   • _config.yml - Hexo 配置文件"
+    echo "   • package.json - npm 项目配置"
     exit 1
 fi
 
