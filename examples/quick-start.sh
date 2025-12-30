@@ -169,14 +169,18 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
         # Try to convert to shallow clone to save space (optional optimization)
         if [ "$GIT_CLONE_DEPTH" = "1" ]; then
             echo "⚙️  优化：转换为浅克隆以节省空间..."
-            (cd "$THEME_DIR" && git fetch --depth 1 && git gc --prune=all) 2>/dev/null || true
+            (cd "$THEME_DIR" && \
+             git fetch --depth 1 --no-tags && \
+             git reflog expire --expire=all --all && \
+             git gc --prune=all --aggressive) 2>/dev/null || true
         fi
     else
         RETRY_COUNT=$((RETRY_COUNT + 1))
         if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
             echo "⚠️  克隆失败，将重试..."
             # 清理失败的克隆尝试
-            rm -rf "$THEME_DIR" .git/modules/"$THEME_DIR" 2>/dev/null
+            THEME_NAME=$(basename "$THEME_DIR")
+            rm -rf "$THEME_DIR" .git/modules/"$THEME_NAME" 2>/dev/null
         fi
     fi
 done
