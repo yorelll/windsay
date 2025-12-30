@@ -121,7 +121,7 @@ git push origin main
 1. **Fork 主题仓库**
    ```bash
    # 在 GitHub 上 fork yorelll/windsay 到你的账号
-   # 例如: yourusername/windsay
+   # 例如: <your-username>/windsay
    ```
 
 2. **更新博客项目使用你 fork 的主题**
@@ -133,7 +133,7 @@ git push origin main
    rm -rf .git/modules/themes/windsay
    
    # 添加你 fork 的主题
-   git submodule add https://github.com/yourusername/windsay.git themes/windsay
+   git submodule add https://github.com/<your-username>/windsay.git themes/windsay
    
    # 提交更改
    git add .
@@ -178,7 +178,7 @@ git push origin main
    # Fork yorelll/windsay 到你的账号
    
    # 克隆你的 fork
-   git clone https://github.com/yourusername/windsay.git
+   git clone https://github.com/<your-username>/windsay.git
    cd windsay
    
    # 添加上游仓库
@@ -208,7 +208,7 @@ git push origin main
    cd my-hexo-blog/themes/windsay
    
    # 添加你的 fork 作为远程仓库
-   git remote add myfork https://github.com/yourusername/windsay.git
+   git remote add myfork https://github.com/<your-username>/windsay.git
    
    # 获取并切换到你的分支
    git fetch myfork
@@ -470,7 +470,7 @@ git push origin main
 
 ```bash
 # 1. Fork 主题仓库并克隆
-git clone https://github.com/yourusername/windsay.git
+git clone https://github.com/<your-username>/windsay.git
 cd windsay
 
 # 2. 创建功能分支
@@ -488,7 +488,7 @@ git push origin feature/custom-style
 cd ../my-hexo-blog
 git submodule deinit themes/windsay
 git rm themes/windsay
-git submodule add https://github.com/yourusername/windsay.git themes/windsay
+git submodule add https://github.com/<your-username>/windsay.git themes/windsay
 
 cd themes/windsay
 git checkout feature/custom-style

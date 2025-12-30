@@ -10,6 +10,11 @@
 
 set -e
 
+# 配置变量
+THEME_REPO_HTTPS="https://github.com/yorelll/windsay"
+THEME_REPO_SSH="git@github.com:yorelll/windsay.git"
+THEME_DIR="themes/windsay"
+
 echo "🚀 Hexo 博客快速设置脚本"
 echo "=========================="
 echo ""
@@ -113,7 +118,7 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
         sleep 2
     fi
     
-    if git submodule add https://github.com/yorelll/windsay themes/windsay; then
+    if git submodule add "$THEME_REPO_HTTPS" "$THEME_DIR"; then
         SUCCESS=true
         echo "✅ 主题克隆成功"
     else
@@ -131,14 +136,14 @@ if [ "$SUCCESS" = false ]; then
     echo "可能的原因和解决方案:"
     echo "1. 网络连接问题 - 请检查网络连接并重试"
     echo "2. GitHub 访问问题 - 可以尝试使用 SSH URL:"
-    echo "   git submodule add git@github.com:yorelll/windsay.git themes/windsay"
+    echo "   git submodule add $THEME_REPO_SSH $THEME_DIR"
     echo "3. 防火墙或代理问题 - 请配置 git 代理或更换网络环境"
     echo ""
     echo "手动解决方法:"
     echo "1. cd $BLOG_DIR"
-    echo "2. git submodule add https://github.com/yorelll/windsay themes/windsay"
+    echo "2. git submodule add $THEME_REPO_HTTPS $THEME_DIR"
     echo "   或者"
-    echo "   git clone https://github.com/yorelll/windsay themes/windsay"
+    echo "   git clone $THEME_REPO_HTTPS $THEME_DIR"
     echo ""
     exit 1
 fi

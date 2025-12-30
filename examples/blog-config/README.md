@@ -93,9 +93,12 @@ cp /path/to/windsay/examples/blog-config/.nvmrc .
 # 安装依赖
 npm install
 
-# 添加主题
+# 添加主题（使用 HTTPS）
 git init
 git submodule add https://github.com/yorelll/windsay themes/windsay
+
+# 或使用 SSH（如果配置了 SSH 密钥）
+# git submodule add git@github.com:yorelll/windsay.git themes/windsay
 
 # 创建必要的目录
 mkdir -p source/_posts
