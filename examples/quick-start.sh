@@ -13,7 +13,11 @@ set -e
 # 配置变量
 THEME_REPO_HTTPS="https://github.com/yorelll/windsay"
 THEME_REPO_SSH="git@github.com:yorelll/windsay.git"
+# GitHub 镜像站（用于加速克隆，适用于中国大陆用户）
+THEME_REPO_MIRROR="https://gitee.com/mirrors/windsay"  # 可选的镜像地址
 THEME_DIR="themes/windsay"
+# Git 克隆配置
+GIT_CLONE_DEPTH="1"  # 使用浅克隆减少下载大小
 
 echo "🚀 Hexo 博客快速设置脚本"
 echo "=========================="
@@ -104,10 +108,48 @@ SCAFFOLD
 
 echo ""
 echo "🎨 添加 windsay 主题..."
+
+# 询问用户是否使用镜像站（适用于中国大陆用户）
+# 支持环境变量 CLONE_OPTION 以便自动化脚本使用
+if [ -z "$CLONE_OPTION" ]; then
+    echo ""
+    echo "⚡ GitHub 克隆优化选项:"
+    echo "1. 使用 GitHub 官方地址 (默认)"
+    echo "2. 使用 GitHub 镜像站 (推荐中国大陆用户，速度更快)"
+    echo "3. 使用 SSH 方式 (需要配置 SSH 密钥)"
+    echo ""
+    read -p "请选择克隆方式 [1-3, 默认 1]: " CLONE_OPTION
+    CLONE_OPTION=${CLONE_OPTION:-1}
+else
+    echo "📌 使用预设的克隆选项: $CLONE_OPTION"
+fi
+
+case $CLONE_OPTION in
+    2)
+        REPO_URL="$THEME_REPO_MIRROR"
+        echo "📌 使用镜像站: $REPO_URL"
+        echo "⚠️  注意: 镜像站可能不是最新版本，建议后续手动更新"
+        ;;
+    3)
+        REPO_URL="$THEME_REPO_SSH"
+        echo "📌 使用 SSH: $REPO_URL"
+        ;;
+    *)
+        REPO_URL="$THEME_REPO_HTTPS"
+        echo "📌 使用 HTTPS: $REPO_URL"
+        ;;
+esac
+
 git init
 
+# 配置 git 以优化克隆速度
+echo "⚙️  配置 Git 克隆参数..."
+git config http.postBuffer 524288000
+git config http.lowSpeedLimit 0
+git config http.lowSpeedTime 999999
+
 # 尝试添加主题作为 git 子模块，包含重试逻辑
-echo "正在克隆主题仓库..."
+echo "正在克隆主题仓库（使用浅克隆加速）..."
 MAX_RETRIES=3
 RETRY_COUNT=0
 SUCCESS=false
@@ -118,13 +160,17 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
         sleep 2
     fi
     
-    if git submodule add "$THEME_REPO_HTTPS" "$THEME_DIR"; then
+    # 使用浅克隆减少下载大小
+    if git submodule add --depth "$GIT_CLONE_DEPTH" "$REPO_URL" "$THEME_DIR" 2>/dev/null || \
+       git submodule add "$REPO_URL" "$THEME_DIR"; then
         SUCCESS=true
         echo "✅ 主题克隆成功"
     else
         RETRY_COUNT=$((RETRY_COUNT + 1))
         if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
             echo "⚠️  克隆失败，将重试..."
+            # 清理失败的克隆尝试
+            rm -rf "$THEME_DIR" .git/modules/themes/windsay 2>/dev/null
         fi
     fi
 done
@@ -135,15 +181,17 @@ if [ "$SUCCESS" = false ]; then
     echo ""
     echo "可能的原因和解决方案:"
     echo "1. 网络连接问题 - 请检查网络连接并重试"
-    echo "2. GitHub 访问问题 - 可以尝试使用 SSH URL:"
-    echo "   git submodule add $THEME_REPO_SSH $THEME_DIR"
-    echo "3. 防火墙或代理问题 - 请配置 git 代理或更换网络环境"
+    echo "2. GitHub 访问速度慢 - 重新运行脚本并选择镜像站选项 (选项 2)"
+    echo "3. 配置 Git 代理:"
+    echo "   git config --global http.proxy http://proxy.example.com:8080"
+    echo "   或 git config --global http.proxy socks5://127.0.0.1:1080"
+    echo "4. 使用 SSH 方式 - 重新运行脚本并选择 SSH 选项 (选项 3)"
     echo ""
     echo "手动解决方法:"
     echo "1. cd $BLOG_DIR"
-    echo "2. git submodule add $THEME_REPO_HTTPS $THEME_DIR"
-    echo "   或者"
-    echo "   git clone $THEME_REPO_HTTPS $THEME_DIR"
+    echo "2. git submodule add --depth 1 $THEME_REPO_HTTPS $THEME_DIR"
+    echo "   或者使用完整克隆:"
+    echo "   git clone --depth 1 $THEME_REPO_HTTPS $THEME_DIR"
     echo ""
     exit 1
 fi
@@ -184,11 +232,15 @@ fi
 
 echo ""
 echo "📄 创建必要的页面..."
-npx hexo new page "categories"
-npx hexo new page "tags"
-npx hexo new page "about"
-npx hexo new page "friends"
 
+# 创建页面目录（不依赖 hexo new page 命令）
+echo "创建页面目录结构..."
+mkdir -p source/categories
+mkdir -p source/tags
+mkdir -p source/about
+mkdir -p source/friends
+
+# 直接创建页面文件而不是使用 npx hexo new page
 # 更新页面的 front-matter
 echo "---
 title: categories
@@ -217,6 +269,8 @@ date: $(date +%Y-%m-%d\ %H:%M:%S)
 type: \"friends\"
 layout: \"friends\"
 ---" > source/friends/index.md
+
+echo "✅ 已创建必要的页面文件"
 
 # 创建 friends 数据文件
 mkdir -p source/_data
