@@ -144,8 +144,11 @@ git init
 
 # 配置 git 以优化克隆速度
 echo "⚙️  配置 Git 克隆参数..."
+# 增加 HTTP 缓冲区大小到 500MB 以处理大文件
 git config http.postBuffer 524288000
+# 禁用低速限制检查，避免网络波动导致中断
 git config http.lowSpeedLimit 0
+# 设置超长超时时间（约 277 小时），适合慢速网络
 git config http.lowSpeedTime 999999
 
 # 尝试添加主题作为 git 子模块，包含重试逻辑
@@ -166,13 +169,13 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = false ]; do
         SUCCESS=true
         echo "✅ 主题克隆成功"
         
-        # Try to convert to shallow clone to save space (optional optimization)
+        # Optional: Try to reduce repository size by cleaning up
+        # Note: Converting to shallow clone after full clone is complex and may fail
+        # Users can manually run: cd themes/windsay && git fetch --depth 1 && git gc
         if [ "$GIT_CLONE_DEPTH" = "1" ]; then
-            echo "⚙️  优化：转换为浅克隆以节省空间..."
-            (cd "$THEME_DIR" && \
-             git fetch --depth 1 --no-tags && \
-             git reflog expire --expire=all --all && \
-             git gc --prune=all --aggressive) 2>/dev/null || true
+            echo "⚙️  优化：清理 Git 仓库以节省空间..."
+            # Just run garbage collection to clean up and compress
+            (cd "$THEME_DIR" && git gc --aggressive --prune=all) 2>/dev/null || true
         fi
     else
         RETRY_COUNT=$((RETRY_COUNT + 1))
