@@ -54,6 +54,37 @@ npm install hexo-generator-feed --save
 npm install hexo-filter-github-emojis --save
 
 echo ""
+echo "📝 创建 Hexo 基础目录结构..."
+mkdir -p source/_posts
+mkdir -p source/_data
+mkdir -p scaffolds
+mkdir -p themes
+
+# 创建基础 scaffold 文件
+cat > scaffolds/post.md << 'SCAFFOLD'
+---
+title: {{ title }}
+date: {{ date }}
+tags:
+categories:
+---
+SCAFFOLD
+
+cat > scaffolds/page.md << 'SCAFFOLD'
+---
+title: {{ title }}
+date: {{ date }}
+---
+SCAFFOLD
+
+cat > scaffolds/draft.md << 'SCAFFOLD'
+---
+title: {{ title }}
+tags:
+---
+SCAFFOLD
+
+echo ""
 echo "🎨 添加 windsay 主题..."
 git init
 git submodule add https://github.com/yorelll/windsay.git themes/windsay
@@ -91,10 +122,6 @@ if [ -f "$THEME_PATH/examples/github-actions/deploy.yml" ]; then
     cp "$THEME_PATH/examples/github-actions/deploy.yml" .github/workflows/
     echo "✅ 已复制部署工作流"
 fi
-
-echo ""
-echo "📝 初始化 Hexo..."
-npx hexo init . --no-install
 
 echo ""
 echo "📄 创建必要的页面..."

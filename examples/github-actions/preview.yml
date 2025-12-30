@@ -2,6 +2,7 @@ name: Preview Deployment
 
 # 为 Pull Request 创建预览部署
 # 可以在合并前预览更改
+# 注意: Cloudflare Pages 会自动管理预览分支，无需手动清理
 
 on:
   pull_request:
