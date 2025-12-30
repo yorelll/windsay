@@ -8,6 +8,17 @@ QQ 交流群1（已满）: [`926552981`](https://jq.qq.com/?_wv=1027&k=5zMDYHT) 
 
 > 这是一个采用 `Material Design` 和响应式设计的 Hexo 博客主题。
 
+## 📚 Cloudflare Pages 部署文档
+
+本主题提供完整的 Cloudflare Pages 部署方案，支持一键发布！
+
+**👉 [查看完整文档索引](DOCUMENTATION_INDEX.md)** 了解所有可用文档
+
+**快速链接**:
+- 🚀 [快速开始](examples/quick-start.sh) - 一键设置博客
+- 📖 [完整部署指南](DEPLOYMENT_GUIDE_CN.md) - 详细步骤
+- ✅ [部署检查清单](DEPLOYMENT_CHECKLIST.md) - 确保不漏步骤
+
 ## 特性
 
 - 简单漂亮，文章内容美观易读

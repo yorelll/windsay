@@ -6,6 +6,17 @@
 
 > This is a Hexo blog theme with 'Material Design' and responsive design.
 
+## 📚 Cloudflare Pages Deployment
+
+This theme provides complete Cloudflare Pages deployment solution with one-click publishing!
+
+**👉 [View Complete Documentation Index](DOCUMENTATION_INDEX.md)** for all available guides
+
+**Quick Links**:
+- 🚀 [Quick Start Script](examples/quick-start.sh) - Automated setup
+- 📖 [Full Deployment Guide](DEPLOYMENT_GUIDE_CN.md) - Detailed steps (Chinese)
+- ✅ [Deployment Checklist](DEPLOYMENT_CHECKLIST.md) - Don't miss any steps
+
 ## Features
 
 - Simple and beautiful, and post is Beautiful and readable.
