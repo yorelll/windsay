@@ -54,9 +54,31 @@ echo ""
 echo "📦 初始化 npm 项目..."
 npm init -y
 
+# 获取安装的 Hexo 版本并更新 package.json
 echo ""
 echo "📥 安装 Hexo 和必要依赖..."
 npm install hexo --save
+
+# 添加 hexo.version 字段到 package.json，这是 hexo 识别项目的关键
+HEXO_VERSION=$(node -p "require('./node_modules/hexo/package.json').version")
+echo "检测到 Hexo 版本: $HEXO_VERSION"
+# 使用 node 来更新 package.json 以保证 JSON 格式正确
+node -e "
+const fs = require('fs');
+const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+pkg.hexo = { version: '$HEXO_VERSION' };
+pkg.private = true;
+pkg.scripts = {
+  build: 'hexo clean && hexo generate',
+  clean: 'hexo clean',
+  deploy: 'hexo deploy',
+  server: 'hexo server',
+  dev: 'hexo server --draft',
+  new: 'hexo new'
+};
+fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+"
+echo "✅ 已配置 package.json"
 npm install hexo-server --save
 npm install hexo-deployer-git --save
 npm install hexo-generator-archive --save
@@ -330,11 +352,15 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "💡 常用命令:"
-echo "• 本地预览: npx hexo server"
+echo "• 本地预览: npx hexo server 或 npm run server"
 echo "• 访问: http://localhost:4000"
-echo "• 创建新文章: npx hexo new \"文章标题\""
-echo "• 清理缓存: npx hexo clean"
-echo "• 生成静态文件: npx hexo generate"
+echo "• 创建新文章: npx hexo new \"文章标题\" 或 npm run new \"文章标题\""
+echo "• 清理缓存: npx hexo clean 或 npm run clean"
+echo "• 生成静态文件: npx hexo generate 或 npm run build"
+echo ""
+echo "🧹 清理和维护:"
+echo "• 清理依赖和临时文件: bash $THEME_DIR/examples/cleanup.sh"
+echo "  （释放磁盘空间，保留文章和配置）"
 echo ""
 echo "📖 详细文档:"
 echo "• 部署指南: $THEME_DIR/DEPLOYMENT_GUIDE_CN.md"
