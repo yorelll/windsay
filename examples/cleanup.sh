@@ -22,11 +22,26 @@ else
     TARGET_DIR="$(pwd)"
 fi
 
+# 转换为绝对路径以提高安全性
+TARGET_DIR=$(cd "$TARGET_DIR" 2>/dev/null && pwd) || {
+    echo "❌ 错误: 无法访问目录 '$1'"
+    exit 1
+}
+
 # 验证目标目录
 if [ ! -d "$TARGET_DIR" ]; then
     echo "❌ 错误: 目录 '$TARGET_DIR' 不存在"
     exit 1
 fi
+
+# 安全检查：防止删除系统关键目录
+case "$TARGET_DIR" in
+    /|/bin|/boot|/dev|/etc|/lib|/proc|/root|/sbin|/sys|/usr|/var|$HOME)
+        echo "❌ 错误: 拒绝清理系统目录或用户主目录"
+        echo "   目标目录: $TARGET_DIR"
+        exit 1
+        ;;
+esac
 
 # 检查是否是 Hexo 项目
 # 一个有效的 Hexo 博客目录应该至少有 _config.yml 或 package.json
@@ -77,60 +92,60 @@ echo ""
 echo "🧹 开始清理..."
 echo ""
 
-cd "$TARGET_DIR"
+# 使用绝对路径进行操作，避免 cd 带来的安全风险
 
 # 删除 node_modules
-if [ -d "node_modules" ]; then
+if [ -d "$TARGET_DIR/node_modules" ]; then
     echo "🗑️  删除 node_modules..."
-    rm -rf node_modules
+    rm -rf "$TARGET_DIR/node_modules"
     echo "✅ 已删除 node_modules"
 else
     echo "⏭️  跳过 node_modules (不存在)"
 fi
 
 # 删除 package-lock.json
-if [ -f "package-lock.json" ]; then
+if [ -f "$TARGET_DIR/package-lock.json" ]; then
     echo "🗑️  删除 package-lock.json..."
-    rm -f package-lock.json
+    rm -f "$TARGET_DIR/package-lock.json"
     echo "✅ 已删除 package-lock.json"
 fi
 
 # 删除 yarn.lock
-if [ -f "yarn.lock" ]; then
+if [ -f "$TARGET_DIR/yarn.lock" ]; then
     echo "🗑️  删除 yarn.lock..."
-    rm -f yarn.lock
+    rm -f "$TARGET_DIR/yarn.lock"
     echo "✅ 已删除 yarn.lock"
 fi
 
 # 删除 public 目录
-if [ -d "public" ]; then
+if [ -d "$TARGET_DIR/public" ]; then
     echo "🗑️  删除 public..."
-    rm -rf public
+    rm -rf "$TARGET_DIR/public"
     echo "✅ 已删除 public"
 else
     echo "⏭️  跳过 public (不存在)"
 fi
 
 # 删除 db.json
-if [ -f "db.json" ]; then
+if [ -f "$TARGET_DIR/db.json" ]; then
     echo "🗑️  删除 db.json..."
-    rm -f db.json
+    rm -f "$TARGET_DIR/db.json"
     echo "✅ 已删除 db.json"
 fi
 
 # 删除 .deploy_git
-if [ -d ".deploy_git" ]; then
+if [ -d "$TARGET_DIR/.deploy_git" ]; then
     echo "🗑️  删除 .deploy_git..."
-    rm -rf .deploy_git
+    rm -rf "$TARGET_DIR/.deploy_git"
     echo "✅ 已删除 .deploy_git"
 else
     echo "⏭️  跳过 .deploy_git (不存在)"
 fi
 
 # 删除 .hexo 缓存目录（如果存在）
-if [ -d ".hexo" ]; then
+if [ -d "$TARGET_DIR/.hexo" ]; then
     echo "🗑️  删除 .hexo..."
-    rm -rf .hexo
+    rm -rf "$TARGET_DIR/.hexo"
     echo "✅ 已删除 .hexo"
 fi
 

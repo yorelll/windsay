@@ -81,7 +81,8 @@ try {
   const fs = require('fs');
   const hexoVersion = process.env.HEXO_VERSION;
   
-  if (!hexoVersion || !/^[\d.]+$/.test(hexoVersion)) {
+  // 严格验证版本号格式 (例如: 7.3.0, 8.1.1)
+  if (!hexoVersion || !/^\\d+(?:\\.\\d+)*$/.test(hexoVersion)) {
     throw new Error('Invalid Hexo version format: ' + hexoVersion);
   }
   
