@@ -18,13 +18,15 @@ echo ""
 # 确定要清理的目录
 if [ -n "$1" ]; then
     TARGET_DIR="$1"
+    INPUT_PATH="$1"
 else
     TARGET_DIR="$(pwd)"
+    INPUT_PATH="当前目录"
 fi
 
 # 转换为绝对路径以提高安全性
 TARGET_DIR=$(cd "$TARGET_DIR" 2>/dev/null && pwd) || {
-    echo "❌ 错误: 无法访问目录 '$1'"
+    echo "❌ 错误: 无法访问目录 '$INPUT_PATH'"
     exit 1
 }
 
