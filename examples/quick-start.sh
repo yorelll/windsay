@@ -556,13 +556,11 @@ if [[ "$REMOTE_REPO" =~ ^git@ ]]; then
     echo "  • 生成密钥: ssh-keygen -t ed25519 -C \"your_email@example.com\""
     echo "  • 添加到 GitHub: https://github.com/settings/keys"
     echo ""
-    PUSH_METHOD="SSH"
 else
     echo "🌐 检测到 HTTPS 方式推送"
     echo "⚠️  可能需要输入 GitHub 用户名和密码（或 Personal Access Token）"
     echo "  • 创建 Token: https://github.com/settings/tokens"
     echo ""
-    PUSH_METHOD="HTTPS"
 fi
 
 read -p "确认推送到远程仓库？(y/n) " -n 1 -r
@@ -614,8 +612,8 @@ if git push -u origin main; then
     echo "  3. 访问你的博客: https://$DOMAIN"
     echo ""
     echo "🔗 快捷链接:"
-    # 从REMOTE_REPO提取仓库信息
-    if [[ "$REMOTE_REPO" =~ github\.com[:/]([^/]+)/([^/.]+) ]]; then
+    # 从REMOTE_REPO提取仓库信息，支持.git后缀
+    if [[ "$REMOTE_REPO" =~ github\.com[:/]([^/]+)/([^/]+?)(?:\.git)?$ ]]; then
         REPO_OWNER="${BASH_REMATCH[1]}"
         REPO_NAME="${BASH_REMATCH[2]}"
         echo "  • GitHub 仓库: https://github.com/$REPO_OWNER/$REPO_NAME"
@@ -631,9 +629,10 @@ else
     echo ""
     echo "常见问题及解决方案:"
     echo ""
-    echo "1. 远程仓库包含本地没有的提交:"
-    echo "   解决: git pull origin main --allow-unrelated-histories"
-    echo "   然后: git push -u origin main"
+    echo "1. 远程仓库包含本地没有的提交 (rejected 或 non-fast-forward):"
+    echo "   cd $BLOG_DIR"
+    echo "   git pull origin main --allow-unrelated-histories"
+    echo "   git push -u origin main"
     echo ""
     echo "2. 需要身份验证 (HTTPS):"
     echo "   • 使用 Personal Access Token 代替密码"
@@ -643,11 +642,6 @@ else
     echo "3. SSH 密钥未配置:"
     echo "   • 生成密钥: ssh-keygen -t ed25519 -C \"your_email@example.com\""
     echo "   • 添加到 GitHub: https://github.com/settings/keys"
-    echo ""
-    echo "手动推送步骤:"
-    echo "  cd $BLOG_DIR"
-    echo "  git pull origin main --allow-unrelated-histories  # 如果远程有内容"
-    echo "  git push -u origin main"
     echo ""
     exit 1
 fi
