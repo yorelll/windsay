@@ -39,26 +39,30 @@ echo ""
 
 # 检查参数
 if [ -z "$1" ] || [ -z "$2" ]; then
-    echo "用法: ./quick-start.sh <博客目录名> <域名>"
+    echo "用法: ./quick-start.sh <博客目录名> <域名> [远程仓库URL]"
     echo ""
     echo "参数说明:"
-    echo "  <博客目录名>  - 本地博客目录名，必须与 GitHub 仓库名一致"
-    echo "  <域名>        - 博客访问域名（必填，例如: blog.example.com）"
+    echo "  <博客目录名>     - 本地博客目录名，必须与 GitHub 仓库名一致"
+    echo "  <域名>           - 博客访问域名（必填，例如: blog.example.com）"
+    echo "  [远程仓库URL]    - 可选，GitHub 仓库 URL（例如: https://github.com/用户名/仓库名.git）"
     echo ""
     echo "示例:"
     echo "  ./quick-start.sh windsay-blog blog.windsay.qzz.io"
-    echo "  ./quick-start.sh my-hexo-blog blog.mysite.com"
+    echo "  ./quick-start.sh windsay-blog blog.windsay.qzz.io https://github.com/yourname/windsay-blog.git"
+    echo "  ./quick-start.sh my-hexo-blog blog.mysite.com git@github.com:yourname/my-hexo-blog.git"
     echo ""
     echo "📌 重要提醒:"
     echo "  1. 博客目录名应该与你的 GitHub 仓库名保持一致"
     echo "  2. 如果目录名是 'windsay-blog'，仓库名也应该是 'windsay-blog'"
     echo "  3. 域名格式: blog.example.com 或 example.com（不包含 https://）"
+    echo "  4. 远程仓库支持 HTTPS 和 SSH 两种格式"
     echo ""
     exit 1
 fi
 
 BLOG_DIR=$1
 DOMAIN=$2
+REMOTE_REPO=$3
 
 # 验证域名格式
 if [[ ! "$DOMAIN" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$ ]]; then
@@ -414,80 +418,23 @@ if [ -f "$THEME_DIR/_config.yml" ]; then
 fi
 
 echo ""
-echo "📝 创建第一篇文章..."
-# 创建第一篇欢迎文章
-FIRST_POST_DATE=$(date +%Y-%m-%d\ %H:%M:%S)
-cat > source/_posts/welcome-to-my-blog.md << EOF
----
-title: 欢迎来到我的博客
-date: $FIRST_POST_DATE
-author: $BLOG_DIR
-img: /medias/featureimages/1.jpg
-top: true
-cover: true
-coverImg: /medias/featureimages/1.jpg
-summary: 这是我使用 Hexo 和 windsay 主题创建的第一篇博客文章。
-categories: 博客
-tags:
-  - Hexo
-  - windsay
-  - 开始
----
-
-# 欢迎来到我的博客！
-
-这是使用 **Hexo** 静态博客框架和 **windsay** 主题创建的第一篇文章。
-
-## 关于这个博客
-
-- 🚀 使用 Hexo 静态站点生成器
-- 🎨 采用 windsay Material Design 主题
-- ☁️ 部署在 Cloudflare Pages
-- 🔄 通过 GitHub Actions 自动部署
-
-## 快速开始
-
-### 创建新文章
-
-\`\`\`bash
-npm run new "文章标题"
-# 或
-npx hexo new "文章标题"
-\`\`\`
-
-### 本地预览
-
-\`\`\`bash
-npm run server
-# 访问 http://localhost:4000
-\`\`\`
-
-### 生成静态文件
-
-\`\`\`bash
-npm run build
-\`\`\`
-
-## 下一步
-
-你可以：
-
-1. 📝 编辑 \`_config.yml\` 修改网站信息
-2. 🎨 编辑 \`source/_data/theme_config.yml\` 自定义主题
-3. ✍️ 在 \`source/_posts/\` 目录创建更多文章
-4. 🖼️ 添加图片到 \`source/medias/\` 目录
-5. 👥 编辑 \`source/_data/friends.json\` 添加友情链接
-
-## 更多资源
-
-- [Hexo 文档](https://hexo.io/zh-cn/docs/)
-- [windsay 主题文档](https://github.com/yorelll/windsay)
-- [Cloudflare Pages 文档](https://developers.cloudflare.com/pages/)
-
-祝你写作愉快！🎉
-EOF
-
-echo "✅ 已创建第一篇文章: source/_posts/welcome-to-my-blog.md"
+echo "📝 复制第一篇文章模板..."
+# 复制第一篇欢迎文章模板（如果存在）
+if [ -f "$THEME_DIR/examples/blog-config/welcome-post.md" ]; then
+    cp "$THEME_DIR/examples/blog-config/welcome-post.md" source/_posts/welcome-to-my-blog.md
+    # 更新日期
+    FIRST_POST_DATE=$(date +%Y-%m-%d\ %H:%M:%S)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s|date: .*|date: $FIRST_POST_DATE|g" source/_posts/welcome-to-my-blog.md
+        sed -i '' "s|author: .*|author: $BLOG_DIR|g" source/_posts/welcome-to-my-blog.md
+    else
+        sed -i "s|date: .*|date: $FIRST_POST_DATE|g" source/_posts/welcome-to-my-blog.md
+        sed -i "s|author: .*|author: $BLOG_DIR|g" source/_posts/welcome-to-my-blog.md
+    fi
+    echo "✅ 已复制并配置第一篇文章: source/_posts/welcome-to-my-blog.md"
+else
+    echo "⚠️  警告: 未找到第一篇文章模板，请手动创建"
+fi
 
 echo ""
 echo "🔧 初始化 Git 仓库并准备提交..."
@@ -533,98 +480,196 @@ echo "  ✅ 创建必要页面 (分类、标签、关于、友链)"
 echo "  ✅ 配置 GitHub Actions 自动部署"
 echo "  ✅ 初始化 Git 并创建初始提交"
 echo ""
+
+# 推送到远程仓库
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🚀 接下来的必要步骤（请按顺序完成）:"
+echo "🚀 推送到 GitHub 仓库"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "步骤 1️⃣: 在 GitHub 创建远程仓库"
-echo "────────────────────────────────────────────────"
-echo "  1. 访问: https://github.com/new"
-echo "  2. ⚠️  仓库名称必须填写: $BLOG_DIR"
-echo "     (必须与本地目录名一致！)"
-echo "  3. 设置为 Public（Cloudflare Pages 免费版要求）"
-echo "  4. ❌ 不要初始化 README、.gitignore 或 license"
-echo "  5. 点击 'Create repository'"
+
+# 如果没有提供远程仓库URL，询问用户
+if [ -z "$REMOTE_REPO" ]; then
+    echo "⚠️  在推送代码之前，请确保已完成以下配置:"
+    echo ""
+    echo "  1️⃣ 在 GitHub 创建远程仓库"
+    echo "     • 访问: https://github.com/new"
+    echo "     • 仓库名称必须为: $BLOG_DIR"
+    echo "     • 设置为 Public（Cloudflare Pages 免费版要求）"
+    echo "     • ❌ 不要初始化 README、.gitignore 或 license"
+    echo ""
+    echo "  2️⃣ 配置 Cloudflare Pages 项目"
+    echo "     • 访问: https://dash.cloudflare.com/"
+    echo "     • 创建名为 '$BLOG_DIR' 的 Pages 项目"
+    echo ""
+    echo "  3️⃣ 配置 GitHub Secrets"
+    echo "     • CLOUDFLARE_API_TOKEN"
+    echo "     • CLOUDFLARE_ACCOUNT_ID"
+    echo "     • 在仓库的 Settings > Secrets and variables > Actions 中添加"
+    echo ""
+    read -p "是否已完成以上配置？(y/n) " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo ""
+        echo "请先完成配置后再继续。"
+        echo "你可以稍后手动推送代码:"
+        echo "  cd $BLOG_DIR"
+        echo "  git remote add origin <你的仓库URL>"
+        echo "  git push -u origin main"
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📖 获取 Cloudflare API 凭据"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "  API Token: https://dash.cloudflare.com/profile/api-tokens"
+        echo "  Account ID: 在 Cloudflare 控制台右侧可找到"
+        echo ""
+        echo "  完整部署指南: $THEME_DIR/DEPLOYMENT_GUIDE_CN.md"
+        echo ""
+        exit 0
+    fi
+    
+    echo ""
+    echo "请输入远程仓库 URL:"
+    echo "  • HTTPS 格式: https://github.com/用户名/$BLOG_DIR.git"
+    echo "  • SSH 格式:   git@github.com:用户名/$BLOG_DIR.git"
+    echo ""
+    read -p "远程仓库 URL: " REMOTE_REPO
+    
+    if [ -z "$REMOTE_REPO" ]; then
+        echo "❌ 错误: 远程仓库 URL 不能为空"
+        echo "你可以稍后手动推送代码:"
+        echo "  cd $BLOG_DIR"
+        echo "  git remote add origin <你的仓库URL>"
+        echo "  git push -u origin main"
+        exit 1
+    fi
+fi
+
 echo ""
-echo "步骤 2️⃣: 配置 Cloudflare Pages"
-echo "────────────────────────────────────────────────"
-echo "  1. 访问: https://dash.cloudflare.com/"
-echo "  2. 进入 'Workers & Pages' > 'Pages'"
-echo "  3. 点击 'Create application' > 'Pages'"
-echo "  4. ⚠️  项目名称必须填写: $BLOG_DIR"
-echo "     (必须与仓库名一致！)"
-echo "  5. 如果已经创建项目，确保项目名正确"
+echo "📌 准备推送到远程仓库: $REMOTE_REPO"
 echo ""
-echo "步骤 3️⃣: 获取 Cloudflare API 凭据"
-echo "────────────────────────────────────────────────"
-echo "  API Token:"
-echo "    1. 访问: https://dash.cloudflare.com/profile/api-tokens"
-echo "    2. 点击 'Create Token'"
-echo "    3. 使用 'Edit Cloudflare Workers' 模板"
-echo "    4. 或创建自定义 token，权限: Account.Cloudflare Pages = Edit"
-echo "    5. 复制生成的 token"
+
+# 检测是SSH还是HTTPS
+if [[ "$REMOTE_REPO" =~ ^git@ ]]; then
+    echo "🔑 检测到 SSH 方式推送"
+    echo "⚠️  请确保已配置 SSH 密钥:"
+    echo "  • 生成密钥: ssh-keygen -t ed25519 -C \"your_email@example.com\""
+    echo "  • 添加到 GitHub: https://github.com/settings/keys"
+    echo ""
+    PUSH_METHOD="SSH"
+else
+    echo "🌐 检测到 HTTPS 方式推送"
+    echo "⚠️  可能需要输入 GitHub 用户名和密码（或 Personal Access Token）"
+    echo "  • 创建 Token: https://github.com/settings/tokens"
+    echo ""
+    PUSH_METHOD="HTTPS"
+fi
+
+read -p "确认推送到远程仓库？(y/n) " -n 1 -r
 echo ""
-echo "  Account ID:"
-echo "    1. 访问: https://dash.cloudflare.com/"
-echo "    2. 选择你的域名"
-echo "    3. 在右侧找到 'Account ID' 并复制"
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo ""
+    echo "已取消推送。你可以稍后手动推送代码:"
+    echo "  cd $BLOG_DIR"
+    echo "  git remote add origin $REMOTE_REPO"
+    echo "  git push -u origin main"
+    echo ""
+    exit 0
+fi
+
+# 添加远程仓库
 echo ""
-echo "步骤 4️⃣: 配置 GitHub Secrets"
-echo "────────────────────────────────────────────────"
-echo "  1. 访问: https://github.com/<你的用户名>/$BLOG_DIR/settings/secrets/actions"
-echo "  2. 点击 'New repository secret'"
-echo "  3. 添加以下两个 secrets:"
-echo "     - Name: CLOUDFLARE_API_TOKEN"
-echo "       Value: [粘贴你的 API Token]"
-echo "     - Name: CLOUDFLARE_ACCOUNT_ID"
-echo "       Value: [粘贴你的 Account ID]"
+echo "🔗 添加远程仓库..."
+if git remote add origin "$REMOTE_REPO" 2>/dev/null; then
+    echo "✅ 远程仓库添加成功"
+else
+    # 如果远程仓库已存在，尝试更新
+    if git remote set-url origin "$REMOTE_REPO" 2>/dev/null; then
+        echo "✅ 远程仓库 URL 已更新"
+    else
+        echo "❌ 错误: 添加远程仓库失败"
+        echo "请检查仓库 URL 是否正确"
+        exit 1
+    fi
+fi
+
+# 推送到远程仓库
 echo ""
-echo "步骤 5️⃣: 推送代码到 GitHub"
-echo "────────────────────────────────────────────────"
-echo "  执行以下命令（请替换 <你的用户名>）:"
+echo "📤 推送代码到远程仓库..."
+echo "   这可能需要几分钟时间..."
 echo ""
-echo "  cd $BLOG_DIR"
-echo "  git remote add origin https://github.com/<你的用户名>/$BLOG_DIR.git"
-echo "  git push -u origin main"
-echo ""
-echo "  推送后 GitHub Actions 将自动:"
-echo "    • 构建你的博客"
-echo "    • 部署到 Cloudflare Pages"
-echo "    • 你的博客将在 https://$DOMAIN 可访问"
-echo ""
-echo "步骤 6️⃣: 配置自定义域名（可选）"
-echo "────────────────────────────────────────────────"
-echo "  如果 $DOMAIN 是你的自定义域名:"
-echo "  1. 在 Cloudflare Pages 项目设置中添加自定义域名"
-echo "  2. 按照提示配置 DNS 记录"
-echo "  3. 等待 DNS 生效（通常几分钟）"
-echo ""
+
+if git push -u origin main; then
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🎉 推送成功！"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "✅ 代码已成功推送到 GitHub"
+    echo "✅ GitHub Actions 将自动开始构建和部署"
+    echo ""
+    echo "📊 后续步骤:"
+    echo "  1. 访问你的 GitHub 仓库查看 Actions 运行状态"
+    echo "  2. 等待部署完成（通常需要 2-5 分钟）"
+    echo "  3. 访问你的博客: https://$DOMAIN"
+    echo ""
+    echo "🔗 快捷链接:"
+    # 从REMOTE_REPO提取仓库信息
+    if [[ "$REMOTE_REPO" =~ github\.com[:/]([^/]+)/([^/.]+) ]]; then
+        REPO_OWNER="${BASH_REMATCH[1]}"
+        REPO_NAME="${BASH_REMATCH[2]}"
+        echo "  • GitHub 仓库: https://github.com/$REPO_OWNER/$REPO_NAME"
+        echo "  • Actions 状态: https://github.com/$REPO_OWNER/$REPO_NAME/actions"
+    fi
+    echo "  • 博客地址: https://$DOMAIN"
+    echo ""
+else
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "⚠️  推送遇到问题"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "常见问题及解决方案:"
+    echo ""
+    echo "1. 远程仓库包含本地没有的提交:"
+    echo "   解决: git pull origin main --allow-unrelated-histories"
+    echo "   然后: git push -u origin main"
+    echo ""
+    echo "2. 需要身份验证 (HTTPS):"
+    echo "   • 使用 Personal Access Token 代替密码"
+    echo "   • 创建 Token: https://github.com/settings/tokens"
+    echo "   • 或改用 SSH 方式"
+    echo ""
+    echo "3. SSH 密钥未配置:"
+    echo "   • 生成密钥: ssh-keygen -t ed25519 -C \"your_email@example.com\""
+    echo "   • 添加到 GitHub: https://github.com/settings/keys"
+    echo ""
+    echo "手动推送步骤:"
+    echo "  cd $BLOG_DIR"
+    echo "  git pull origin main --allow-unrelated-histories  # 如果远程有内容"
+    echo "  git push -u origin main"
+    echo ""
+    exit 1
+fi
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "💡 本地开发和更新"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "常用命令:"
-echo "  • 本地预览:      npm run server"
+echo "  • 本地预览:      cd $BLOG_DIR && npm run server"
 echo "    然后访问:      http://localhost:4000"
-echo "  • 创建新文章:    npm run new \"文章标题\""
-echo "  • 清理缓存:      npm run clean"
-echo "  • 生成静态文件:  npm run build"
-echo ""
-echo "自定义博客（使用 update.sh 脚本）:"
-echo "  博客创建后，你可以使用 update.sh 脚本来自定义:"
-echo "  • 修改博客配置（站点信息、主题设置等）"
-echo "  • 更换主题样式和颜色"
-echo "  • 添加/修改博客内容"
-echo ""
-echo "  update.sh 脚本位置: $THEME_DIR/examples/update.sh"
-echo "  使用方法请查看: $THEME_DIR/examples/README.md"
+echo "  • 创建新文章:    cd $BLOG_DIR && npm run new \"文章标题\""
+echo "  • 清理缓存:      cd $BLOG_DIR && npm run clean"
+echo "  • 生成静态文件:  cd $BLOG_DIR && npm run build"
 echo ""
 echo "发布更新到博客:"
-echo "  1. 编辑文件（配置、文章等）"
-echo "  2. git add ."
-echo "  3. git commit -m \"更新说明\""
-echo "  4. git push"
-echo "  5. GitHub Actions 将自动重新部署"
+echo "  1. cd $BLOG_DIR"
+echo "  2. 编辑文件（配置、文章等）"
+echo "  3. git add ."
+echo "  4. git commit -m \"更新说明\""
+echo "  5. git push"
+echo "  6. GitHub Actions 将自动重新部署"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📖 文档资源"
@@ -633,22 +678,7 @@ echo ""
 echo "  • 完整部署指南:   $THEME_DIR/DEPLOYMENT_GUIDE_CN.md"
 echo "  • 主题更新指南:   $THEME_DIR/THEME_UPDATE_GUIDE.md"
 echo "  • 文档索引:       $THEME_DIR/DOCUMENTATION_INDEX.md"
-echo "  • 示例配置:       $THEME_DIR/examples/"
-echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "⚠️  重要提醒"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo ""
-echo "  ⚡ 仓库名称必须一致:"
-echo "     本地目录名 = GitHub 仓库名 = Cloudflare 项目名 = $BLOG_DIR"
-echo ""
-echo "  🌐 域名配置:"
-echo "     博客配置域名:  https://$DOMAIN"
-echo "     请确保在 Cloudflare Pages 中配置相同的域名"
-echo ""
-echo "  🔑 不要忘记设置 GitHub Secrets:"
-echo "     CLOUDFLARE_API_TOKEN 和 CLOUDFLARE_ACCOUNT_ID"
-echo "     否则自动部署将失败"
+echo "  • 更新脚本:       $THEME_DIR/examples/update.sh"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
