@@ -38,21 +38,44 @@ bash examples/quick-start.sh my-blog blog.example.com
 - 下一步建议
 - 资源链接
 
-位置：`source/_posts/welcome-to-my-blog.md`
+**模板文件**: `examples/blog-config/welcome-post.md`  
+**生成位置**: `source/_posts/welcome-to-my-blog.md`
 
-### 4. Git 自动化
+**优点**:
+- 可以自定义模板内容
+- 使用标准的 Hexo 写作流程
+- 方便版本控制和维护
+
+### 4. Git 自动化和自动推送
 
 **新增功能**: 脚本自动完成：
 - `git init` - 初始化仓库
 - `git add .` - 添加所有文件
 - `git commit` - 创建描述性提交
 - `git branch -M main` - 设置主分支
+- `git remote add origin` - 添加远程仓库（可选）
+- `git push -u origin main` - 推送代码（可选）
 
-用户只需要：
+**支持两种工作流**:
+
+1. **自动推送模式**（推荐）：
 ```bash
-git remote add origin https://github.com/用户名/仓库名.git
+# 提供远程仓库 URL，脚本自动推送
+bash examples/quick-start.sh my-blog blog.example.com https://github.com/用户名/my-blog.git
+```
+
+2. **手动推送模式**：
+```bash
+# 不提供仓库 URL，稍后手动推送
+bash examples/quick-start.sh my-blog blog.example.com
+# 稍后手动执行
+git remote add origin https://github.com/用户名/my-blog.git
 git push -u origin main
 ```
+
+**支持 HTTPS 和 SSH**:
+- HTTPS: `https://github.com/用户名/仓库名.git` (默认，可能需要输入凭据)
+- SSH: `git@github.com:用户名/仓库名.git` (需要预先配置 SSH 密钥)
 
 ### 5. 智能验证和提醒
 
@@ -114,6 +137,22 @@ git push -u origin main
 
 ### v2.0 工作流程（新版）
 
+**方式一：自动推送（推荐）**
+```
+1. 在 GitHub 创建名为 windsay-blog 的仓库（Public，不要初始化）
+2. 添加 Cloudflare Secrets 到 GitHub
+   - CLOUDFLARE_API_TOKEN
+   - CLOUDFLARE_ACCOUNT_ID
+3. bash examples/quick-start.sh windsay-blog blog.example.com https://github.com/用户名/windsay-blog.git
+   (脚本会提醒你完成配置，然后自动推送)
+4. 博客自动部署完成！
+
+后续更新:
+5. bash ../windsay/examples/update.sh
+   (使用交互式菜单管理博客)
+```
+
+**方式二：手动推送**
 ```
 1. bash examples/quick-start.sh windsay-blog blog.example.com
    (自动完成: 域名配置、Hero 初始化、创建文章、Git 提交)
@@ -133,11 +172,13 @@ git push -u origin main
 
 ### 时间节省
 - **v1.0**: ~30-45 分钟
-- **v2.0**: ~10-15 分钟
+- **v2.0 (手动推送)**: ~10-15 分钟
+- **v2.0 (自动推送)**: ~5-8 分钟
 
 ### 手动步骤
 - **v1.0**: 12 个手动步骤
-- **v2.0**: 4 个手动步骤
+- **v2.0 (手动推送)**: 4 个手动步骤
+- **v2.0 (自动推送)**: 2 个手动步骤 (创建仓库 + 配置 Secrets)
 
 ### 错误风险
 - **v1.0**: 高（多个手动配置步骤）
@@ -205,6 +246,32 @@ bash examples/quick-start.sh my-blog https://blog.example.com
 bash examples/quick-start.sh my-blog blog.example.com/
 ```
 
+### 问题: 推送失败 "rejected"
+
+这是用户在问题描述中遇到的问题。现在脚本提供了解决方案：
+
+**场景 1: 远程仓库已有内容**
+```bash
+# 脚本会提示，但如果手动操作
+cd windsay-blog
+git pull origin main --allow-unrelated-histories
+git push -u origin main
+```
+
+**场景 2: HTTPS 需要身份验证**
+- 使用 Personal Access Token 代替密码
+- 创建: https://github.com/settings/tokens
+- 或使用 SSH 方式: `git@github.com:用户名/仓库名.git`
+
+**场景 3: SSH 密钥未配置**
+```bash
+# 生成 SSH 密钥
+ssh-keygen -t ed25519 -C "your_email@example.com"
+
+# 添加到 GitHub
+# 访问 https://github.com/settings/keys
+```
+
 ### 问题: Git 子模块克隆失败
 
 **解决方案**: 
@@ -244,8 +311,13 @@ brew install gnu-sed
 ### v2.0.0 (2025-12-31)
 - ✨ 新增域名必填参数
 - ✨ 新增 Hero 区域自动初始化
-- ✨ 新增第一篇文章自动创建
+- ✨ 新增第一篇文章自动创建（模板化）
 - ✨ 新增 Git 自动提交
+- ✨ 新增可选的远程仓库 URL 参数
+- ✨ 新增自动推送到 GitHub 功能
+- ✨ 支持 HTTPS 和 SSH 两种推送方式
+- ✨ 新增推送前配置提醒（Cloudflare + GitHub Actions）
+- ✨ 新增推送失败错误处理和指导
 - ✨ 新增 update.sh 管理工具
 - 🐛 修复 macOS sed 兼容性问题
 - 📝 更新所有文档

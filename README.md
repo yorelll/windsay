@@ -16,20 +16,24 @@ This theme provides complete Cloudflare Pages deployment solution with **enhance
 ```bash
 # One command to create a complete blog with domain configuration
 bash examples/quick-start.sh windsay-blog blog.example.com
+
+# Or with automatic push to GitHub (recommended)
+bash examples/quick-start.sh windsay-blog blog.example.com https://github.com/yourname/windsay-blog.git
 ```
 
 The enhanced quick-start script will:
 - ✅ Create complete Hexo blog structure
 - ✅ Configure domain and site information
 - ✅ Initialize hero section
-- ✅ Create your first welcome post
+- ✅ Create your first welcome post (from template)
 - ✅ Setup GitHub Actions for auto-deployment
 - ✅ Prepare Git repository ready to push
+- ✅ Optionally push to GitHub automatically
 
 **What you need to do**:
 1. Create a GitHub repository (name must match: `windsay-blog`)
 2. Add Cloudflare API credentials to GitHub Secrets
-3. Push the code - your blog goes live automatically!
+3. Run the script - your blog goes live automatically (if using auto-push)!
 
 **Additional Resources**:
 - 🔄 [Update Script](examples/update.sh) - Manage and customize your blog after setup
@@ -717,6 +721,9 @@ This theme provides a complete Cloudflare Pages deployment guide with one-click 
 # Using the enhanced quick start script (v2.0)
 bash examples/quick-start.sh windsay-blog blog.example.com
 
+# Or with automatic push to GitHub
+bash examples/quick-start.sh windsay-blog blog.example.com https://github.com/yourname/windsay-blog.git
+
 # This will create a complete blog ready to deploy!
 ```
 
@@ -724,14 +731,15 @@ bash examples/quick-start.sh windsay-blog blog.example.com
 - ✅ Complete Hexo blog with windsay theme
 - ✅ Domain and site configuration
 - ✅ Hero section initialization
-- ✅ First welcome post
+- ✅ First welcome post (from template)
 - ✅ GitHub Actions auto-deployment
 - ✅ Git repository ready to push
+- ✅ Optional automatic push to GitHub
 
 **Your steps**:
 1. Create GitHub repo (name: `windsay-blog`)
 2. Add Cloudflare secrets to GitHub
-3. Push code → Blog goes live!
+3. Run script → Blog goes live (if using auto-push)!
 
 For customization after setup, use the [update script](examples/update.sh)
 
