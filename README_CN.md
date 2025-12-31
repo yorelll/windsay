@@ -18,20 +18,24 @@ QQ 交流群1（已满）: [`926552981`](https://jq.qq.com/?_wv=1027&k=5zMDYHT) 
 ```bash
 # 一条命令创建完整博客，包含域名配置
 bash examples/quick-start.sh windsay-blog blog.example.com
+
+# 或者自动推送到 GitHub（推荐）
+bash examples/quick-start.sh windsay-blog blog.example.com https://github.com/yourname/windsay-blog.git
 ```
 
 增强版快速开始脚本将：
 - ✅ 创建完整的 Hexo 博客结构
 - ✅ 配置域名和站点信息
 - ✅ 初始化 hero 区域
-- ✅ 创建第一篇欢迎文章
+- ✅ 创建第一篇欢迎文章（从模板）
 - ✅ 设置 GitHub Actions 自动部署
 - ✅ 准备好可推送的 Git 仓库
+- ✅ 可选自动推送到 GitHub
 
 **你只需要做**:
 1. 创建 GitHub 仓库（名称必须一致：`windsay-blog`）
 2. 添加 Cloudflare API 密钥到 GitHub Secrets
-3. 推送代码 - 博客自动上线！
+3. 运行脚本 - 博客自动上线！（如果使用自动推送）
 
 **其他资源**:
 - 🔄 [更新脚本](examples/update.sh) - 设置后管理和自定义博客
@@ -738,6 +742,9 @@ $('.bg-cover').css('background-image', 'url(/medias/banner/' + new Date().getDay
 # 使用增强版快速开始脚本 (v2.0)
 bash examples/quick-start.sh windsay-blog blog.example.com
 
+# 或者自动推送到 GitHub
+bash examples/quick-start.sh windsay-blog blog.example.com https://github.com/yourname/windsay-blog.git
+
 # 这将创建一个完整的可部署博客！
 ```
 
@@ -745,14 +752,15 @@ bash examples/quick-start.sh windsay-blog blog.example.com
 - ✅ 完整的 Hexo 博客和 windsay 主题
 - ✅ 域名和站点配置
 - ✅ Hero 区域初始化
-- ✅ 第一篇欢迎文章
+- ✅ 第一篇欢迎文章（从模板）
 - ✅ GitHub Actions 自动部署
 - ✅ 准备好推送的 Git 仓库
+- ✅ 可选自动推送到 GitHub
 
 **你的步骤**:
 1. 创建 GitHub 仓库（名称：`windsay-blog`）
 2. 添加 Cloudflare 密钥到 GitHub
-3. 推送代码 → 博客上线！
+3. 运行脚本 → 博客上线！（如果使用自动推送）
 
 设置后的自定义，请使用 [更新脚本](examples/update.sh)
 
