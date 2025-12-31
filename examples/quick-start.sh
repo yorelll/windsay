@@ -312,9 +312,16 @@ echo "📋 复制并配置示例文件..."
 # 复制配置文件并更新域名
 if [ -f "$THEME_DIR/examples/blog-config/_config.yml" ]; then
     cp "$THEME_DIR/examples/blog-config/_config.yml" _config.yml
-    # 使用 sed 更新域名
-    sed -i "s|url: https://blog.windsay.qzz.io|url: https://$DOMAIN|g" _config.yml
-    sed -i "s|title: 我的博客|title: $BLOG_DIR|g" _config.yml
+    # 使用 sed 更新域名（兼容 macOS 和 Linux）
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "s|url: https://blog.windsay.qzz.io|url: https://$DOMAIN|g" _config.yml
+        sed -i '' "s|title: 我的博客|title: $BLOG_DIR|g" _config.yml
+    else
+        # Linux
+        sed -i "s|url: https://blog.windsay.qzz.io|url: https://$DOMAIN|g" _config.yml
+        sed -i "s|title: 我的博客|title: $BLOG_DIR|g" _config.yml
+    fi
     echo "✅ 已复制并配置 _config.yml"
     echo "   - 域名已设置为: https://$DOMAIN"
 else
@@ -340,8 +347,12 @@ mkdir -p .github/workflows
 
 if [ -f "$THEME_DIR/examples/github-actions/deploy.yml" ]; then
     cp "$THEME_DIR/examples/github-actions/deploy.yml" .github/workflows/
-    # 更新 Cloudflare Pages 项目名
-    sed -i "s|projectName: windsay-blog|projectName: $BLOG_DIR|g" .github/workflows/deploy.yml
+    # 更新 Cloudflare Pages 项目名（兼容 macOS 和 Linux）
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s|projectName: windsay-blog|projectName: $BLOG_DIR|g" .github/workflows/deploy.yml
+    else
+        sed -i "s|projectName: windsay-blog|projectName: $BLOG_DIR|g" .github/workflows/deploy.yml
+    fi
     echo "✅ 已复制并配置部署工作流"
     echo "   - Cloudflare 项目名已设置为: $BLOG_DIR"
 fi
@@ -493,12 +504,12 @@ echo "✅ 已添加所有文件到 Git"
 # 创建初始提交
 git commit -m "Initial commit: Setup Hexo blog with windsay theme
 
-- 配置博客基本信息
-- 设置域名: https://$DOMAIN
-- 添加 windsay 主题作为子模块
-- 初始化 hero 区域配置
-- 创建第一篇欢迎文章
-- 配置 GitHub Actions 自动部署到 Cloudflare Pages
+- Configure blog with domain: https://$DOMAIN
+- Add windsay theme as git submodule
+- Initialize hero section configuration
+- Create first welcome article
+- Setup GitHub Actions for auto-deployment to Cloudflare Pages
+- Project name: $BLOG_DIR
 "
 echo "✅ 已创建初始提交"
 

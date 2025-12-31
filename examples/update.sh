@@ -183,7 +183,12 @@ update_domain() {
         new_domain="https://$new_domain"
     fi
     
-    sed -i "s|^url:.*|url: $new_domain|" _config.yml
+    # 更新域名（兼容 macOS 和 Linux）
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s|^url:.*|url: $new_domain|" _config.yml
+    else
+        sed -i "s|^url:.*|url: $new_domain|" _config.yml
+    fi
     echo "✅ 域名已更新为: $new_domain"
     echo ""
     echo "⚠️  注意: 请确保在 Cloudflare Pages 中也配置了相同的域名"
