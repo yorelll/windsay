@@ -12,6 +12,5 @@ public/
 *~
 .deploy_git/
 .history
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
