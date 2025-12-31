@@ -2,6 +2,59 @@
 
 本指南将帮助你将使用 windsay 主题的 Hexo 博客部署到 Cloudflare Pages，实现本地 push 后自动发布。
 
+## 🚀 快速开始（推荐）
+
+如果你想快速创建博客，请使用我们的**增强版一键脚本**：
+
+```bash
+# 克隆主题仓库
+git clone https://github.com/yorelll/windsay.git
+cd windsay
+
+# 运行增强版快速开始脚本
+bash examples/quick-start.sh windsay-blog blog.example.com
+```
+
+**脚本将自动完成**：
+- ✅ 创建完整的 Hexo 博客结构
+- ✅ 配置域名和站点信息
+- ✅ 初始化 Hero 区域
+- ✅ 创建第一篇欢迎文章
+- ✅ 设置 GitHub Actions 自动部署
+- ✅ 准备好可推送的 Git 仓库
+
+**你只需要完成**：
+1. 在 GitHub 创建名为 `windsay-blog` 的仓库
+2. 添加 Cloudflare API 密钥到 GitHub Secrets
+3. 推送代码到 GitHub
+
+然后你的博客就会自动部署到 `https://blog.example.com`！
+
+使用快速脚本后，可以跳到 [第三步：配置 Cloudflare](#第三步配置-cloudflare)。
+
+如果你想了解详细的手动设置流程，请继续阅读下面的内容。
+
+## 🔄 使用 update.sh 管理博客
+
+创建博客后，你可以使用 `update.sh` 脚本来管理和自定义你的博客：
+
+```bash
+cd windsay-blog
+bash ../windsay/examples/update.sh
+```
+
+**update.sh 提供的功能**：
+- 📝 创建新文章和草稿
+- ⚙️ 修改博客配置（标题、域名等）
+- 🎨 自定义主题（Hero、音乐、颜色）
+- 👥 管理友情链接
+- 🚀 本地预览和发布更新
+- 🔧 清理缓存和维护
+
+详细使用方法请查看 [examples/README.md](examples/README.md)。
+
+---
+
 ## 📚 架构说明
 
 ### 仓库分离设计
@@ -56,6 +109,14 @@ Windsay 采用**主题与内容分离**的架构，这是推荐的最佳实践�
 - **自定义域名**: 例如 blog.windsay.qzz.io（可选）
 
 > **重要提示**: 请不要将博客配置和文章内容直接提交到 windsay 主题仓库。主题仓库应该保持纯净，只包含主题相关的代码。你的博客内容应该放在单独的仓库中（如 windsay-blog）。
+
+---
+
+## 手动部署流程
+
+> **💡 提示**: 如果你使用了上面的[快速开始脚本](#🚀-快速开始推荐)，可以跳过第一步和第二步，直接跳到[第三步：配置 Cloudflare](#第三步配置-cloudflare)。
+
+以下是完整的手动部署步骤，适合想要了解每个步骤细节的用户。
 
 ## 第一步：创建博客仓库
 

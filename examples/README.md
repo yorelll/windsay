@@ -23,18 +23,32 @@
 
 ## 快速开始工具
 
-### quick-start.sh - 一键创建博客
+### quick-start.sh - 一键创建博客 (v2.0 增强版)
 
 自动化脚本，快速创建一个完整的 Hexo 博客项目，包含主题、配置和所有依赖。
+
+**📖 详细说明**: 查看 [Quick Start v2.0 功能说明](QUICK_START_V2.md)
+
+**✨ v2.0 新特性**:
+- ✅ 域名参数必填，自动配置到博客中
+- ✅ 自动初始化 Hero 区域配置
+- ✅ 自动创建第一篇欢迎文章
+- ✅ 自动进行 git commit，准备推送
+- ✅ 智能提醒：仓库名称必须一致
+- ✅ 详细的后续步骤指导
 
 **使用方法:**
 
 ```bash
-# 使用快速开始脚本（推荐）
-bash examples/quick-start.sh my-hexo-blog
+# 基本用法：指定博客目录名和域名
+bash examples/quick-start.sh <博客目录名> <域名>
+
+# 示例
+bash examples/quick-start.sh windsay-blog blog.windsay.qzz.io
+bash examples/quick-start.sh my-hexo-blog blog.example.com
 
 # 进入博客目录
-cd my-hexo-blog
+cd windsay-blog
 
 # 本地预览
 npm run server
@@ -43,11 +57,84 @@ npm run server
 npm run new "文章标题"
 ```
 
-**重要更新 (v2.0):**
-- ✅ 修复了 hexo 命令不可用的问题
-- ✅ 自动配置 package.json 以支持所有 hexo 命令
-- ✅ 添加了便捷的 npm scripts（`npm run server`, `npm run new` 等）
-- ✅ 提供了网络优化选项和重试机制
+**重要提醒**:
+- ⚠️ 博客目录名必须与 GitHub 仓库名一致
+- ⚠️ 博客目录名必须与 Cloudflare Pages 项目名一致
+- ⚠️ 域名格式：`blog.example.com`（不要包含 `https://`）
+
+**脚本完成的工作**:
+1. ✅ 创建 Hexo 博客项目结构
+2. ✅ 安装所有必要的依赖包
+3. ✅ 添加 windsay 主题作为 Git 子模块
+4. ✅ 配置博客信息（标题、域名等）
+5. ✅ 初始化 Hero 区域配置
+6. ✅ 创建第一篇欢迎文章
+7. ✅ 创建必要页面（分类、标签、关于、友链）
+8. ✅ 配置 GitHub Actions 自动部署
+9. ✅ 初始化 Git 并创建初始提交
+
+**你需要完成的步骤**:
+1. 在 GitHub 创建仓库（名称必须与目录名一致）
+2. 设置 Cloudflare API 凭据到 GitHub Secrets
+3. 推送代码到 GitHub
+4. 等待自动部署完成
+
+### update.sh - 博客更新和管理工具 (新增)
+
+用于管理和自定义已创建的博客，提供交互式菜单操作。
+
+**功能特性**:
+
+📝 **内容管理**:
+- 创建新文章
+- 创建和发布草稿
+- 列出所有文章
+
+⚙️ **配置更新**:
+- 修改博客基本信息
+- 修改域名配置
+- 自定义主题配置（Hero、音乐、颜色等）
+- 更新友情链接
+
+🎨 **主题管理**:
+- 更新 windsay 主题到最新版本
+- 查看主题版本信息
+
+🚀 **部署和发布**:
+- 本地预览博客
+- 构建静态文件
+- 提交并推送更新（触发自动部署）
+
+🔧 **维护工具**:
+- 清理缓存和临时文件
+- 重新安装依赖
+- 查看博客统计信息
+
+**使用方法:**
+
+```bash
+# 在博客目录内运行
+cd windsay-blog
+bash ../windsay/examples/update.sh
+
+# 或从主题目录运行
+bash examples/update.sh ../windsay-blog
+
+# 或指定博客目录
+bash examples/update.sh /path/to/your/blog
+```
+
+**使用场景**:
+
+创建博客后，使用 update.sh 来：
+- 📝 添加新文章
+- ⚙️ 修改配置（标题、域名、主题设置）
+- 🎨 自定义主题（颜色、Hero、音乐）
+- 👥 管理友情链接
+- 🚀 发布更新到线上
+
+**交互式菜单**:
+脚本提供友好的交互式菜单，选择对应数字即可执行操作，适合不熟悉命令行的用户。
 
 ### cleanup.sh - 清理博客资源
 
@@ -79,21 +166,40 @@ bash examples/cleanup.sh my-hexo-blog
 
 ## 使用方法
 
-### 方法一：使用快速开始脚本（推荐）
+### 方法一：使用增强版快速开始脚本（强烈推荐）
 
 ```bash
-# 克隆主题仓库
+# 克隆主题仓库（如果还没有）
 git clone https://github.com/yorelll/windsay.git
 
-# 运行快速开始脚本
+# 运行增强版快速开始脚本（v2.0）
 cd windsay
-bash examples/quick-start.sh my-hexo-blog
+bash examples/quick-start.sh windsay-blog blog.example.com
 
-# 进入博客目录开始使用
-cd my-hexo-blog
-npm run server  # 本地预览
-npm run new "我的第一篇文章"  # 创建文章
+# 等待脚本完成后，按照提示操作：
+# 1. 在 GitHub 创建名为 windsay-blog 的仓库
+# 2. 设置 Cloudflare API 密钥到 GitHub Secrets
+# 3. 推送代码
+cd windsay-blog
+git remote add origin https://github.com/<你的用户名>/windsay-blog.git
+git push -u origin main
+
+# 使用 update.sh 管理博客
+bash ../windsay/examples/update.sh
 ```
+
+**一条命令完成的工作**:
+- ✅ 创建完整博客结构
+- ✅ 配置域名和站点信息
+- ✅ 初始化 Hero 区域
+- ✅ 创建第一篇文章
+- ✅ 设置自动部署
+- ✅ 准备 Git 提交
+
+**你只需要**:
+- 创建 GitHub 仓库
+- 设置 Cloudflare 密钥
+- 推送代码
 
 ### 方法二：手动设置博客项目
 

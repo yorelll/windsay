@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Hexo 博客快速设置脚本
+# Hexo 博客快速设置脚本 v2.0
 # 用于快速创建一个新的 Hexo 博客项目，使用 windsay 主题
 # 
 # 重要说明:
@@ -19,26 +19,69 @@ THEME_DIR="themes/windsay"
 # Git 克隆配置
 GIT_CLONE_DEPTH="1"  # 使用浅克隆减少下载大小
 
-echo "🚀 Hexo 博客快速设置脚本"
-echo "=========================="
+echo "🚀 Hexo 博客快速设置脚本 v2.0"
+echo "================================="
 echo ""
-echo "📝 注意事项:"
-echo "   • 此脚本将创建一个新的 Hexo 博客项目"
-echo "   • windsay 主题将作为 git 子模块添加"
-echo "   • 请在 GitHub 创建一个博客仓库 (例如: windsay-blog)"
-echo "   • 不要将博客内容提交到 windsay 主题仓库"
+echo "📝 此脚本将帮助你:"
+echo "   • 创建一个完整的 Hexo 博客项目"
+echo "   • 配置 windsay 主题"
+echo "   • 初始化 hero 区域"
+echo "   • 创建第一篇文章"
+echo "   • 设置 GitHub Actions 自动部署"
+echo "   • 准备好推送到远程仓库"
+echo ""
+echo "⚠️  重要提醒:"
+echo "   • 请先在 GitHub 创建一个博客仓库"
+echo "   • 仓库名称必须与下面的参数名称一致"
+echo "   • 你需要提供域名用于博客访问"
+echo "   • 需要在 GitHub 仓库设置 Cloudflare API 密钥"
 echo ""
 
 # 检查参数
-if [ -z "$1" ]; then
-    echo "用法: ./quick-start.sh <博客目录名>"
-    echo "示例: ./quick-start.sh my-hexo-blog"
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "用法: ./quick-start.sh <博客目录名> <域名>"
     echo ""
-    echo "推荐的博客目录名: windsay-blog"
+    echo "参数说明:"
+    echo "  <博客目录名>  - 本地博客目录名，必须与 GitHub 仓库名一致"
+    echo "  <域名>        - 博客访问域名（必填，例如: blog.example.com）"
+    echo ""
+    echo "示例:"
+    echo "  ./quick-start.sh windsay-blog blog.windsay.qzz.io"
+    echo "  ./quick-start.sh my-hexo-blog blog.mysite.com"
+    echo ""
+    echo "📌 重要提醒:"
+    echo "  1. 博客目录名应该与你的 GitHub 仓库名保持一致"
+    echo "  2. 如果目录名是 'windsay-blog'，仓库名也应该是 'windsay-blog'"
+    echo "  3. 域名格式: blog.example.com 或 example.com（不包含 https://）"
+    echo ""
     exit 1
 fi
 
 BLOG_DIR=$1
+DOMAIN=$2
+
+# 验证域名格式
+if [[ ! "$DOMAIN" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*$ ]]; then
+    echo "❌ 错误: 无效的域名格式: $DOMAIN"
+    echo "   域名示例: blog.example.com 或 example.com"
+    echo "   请不要包含 https:// 或尾部斜杠"
+    exit 1
+fi
+
+echo ""
+echo "📋 配置信息确认:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  博客目录名: $BLOG_DIR"
+echo "  博客域名:   https://$DOMAIN"
+echo "  GitHub 仓库: https://github.com/<你的用户名>/$BLOG_DIR"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+read -p "确认以上信息正确？(y/n) " -n 1 -r
+echo ""
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "已取消设置"
+    exit 1
+fi
 
 # 检查目录是否存在
 if [ -d "$BLOG_DIR" ]; then
@@ -46,6 +89,7 @@ if [ -d "$BLOG_DIR" ]; then
     exit 1
 fi
 
+echo ""
 echo "📁 创建博客目录: $BLOG_DIR"
 mkdir -p "$BLOG_DIR"
 cd "$BLOG_DIR"
@@ -263,12 +307,23 @@ if [ "$SUCCESS" = false ]; then
 fi
 
 echo ""
-echo "📋 复制示例配置文件..."
+echo "📋 复制并配置示例文件..."
 
-# 复制配置文件
+# 复制配置文件并更新域名
 if [ -f "$THEME_DIR/examples/blog-config/_config.yml" ]; then
     cp "$THEME_DIR/examples/blog-config/_config.yml" _config.yml
-    echo "✅ 已复制 _config.yml"
+    # 使用 sed 更新域名（兼容 macOS 和 Linux）
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "s|url: https://blog.windsay.qzz.io|url: https://$DOMAIN|g" _config.yml
+        sed -i '' "s|title: 我的博客|title: $BLOG_DIR|g" _config.yml
+    else
+        # Linux
+        sed -i "s|url: https://blog.windsay.qzz.io|url: https://$DOMAIN|g" _config.yml
+        sed -i "s|title: 我的博客|title: $BLOG_DIR|g" _config.yml
+    fi
+    echo "✅ 已复制并配置 _config.yml"
+    echo "   - 域名已设置为: https://$DOMAIN"
 else
     echo "⚠️  警告: 未找到示例配置文件，使用默认配置"
 fi
@@ -292,7 +347,14 @@ mkdir -p .github/workflows
 
 if [ -f "$THEME_DIR/examples/github-actions/deploy.yml" ]; then
     cp "$THEME_DIR/examples/github-actions/deploy.yml" .github/workflows/
-    echo "✅ 已复制部署工作流"
+    # 更新 Cloudflare Pages 项目名（兼容 macOS 和 Linux）
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s|projectName: windsay-blog|projectName: $BLOG_DIR|g" .github/workflows/deploy.yml
+    else
+        sed -i "s|projectName: windsay-blog|projectName: $BLOG_DIR|g" .github/workflows/deploy.yml
+    fi
+    echo "✅ 已复制并配置部署工作流"
+    echo "   - Cloudflare 项目名已设置为: $BLOG_DIR"
 fi
 
 echo ""
@@ -342,59 +404,253 @@ mkdir -p source/_data
 echo "[]" > source/_data/friends.json
 
 echo ""
-echo "✅ 设置完成！"
+echo "🎨 初始化 Hero 区域..."
+# 复制主题配置文件到 source/_data 目录以便自定义
+mkdir -p source/_data
+if [ -f "$THEME_DIR/_config.yml" ]; then
+    cp "$THEME_DIR/_config.yml" source/_data/theme_config.yml
+    echo "✅ 已复制主题配置到 source/_data/theme_config.yml"
+    echo "   你可以稍后编辑此文件来自定义 hero 区域、音乐等"
+fi
+
 echo ""
-echo "📚 重要说明:"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "1️⃣  仓库分离架构"
-echo "   • 主题仓库: https://github.com/yorelll/windsay"
-echo "   • 博客仓库: 你需要创建一个新仓库存放博客内容"
-echo "   • 建议博客仓库名: windsay-blog 或 my-hexo-blog"
+echo "📝 创建第一篇文章..."
+# 创建第一篇欢迎文章
+FIRST_POST_DATE=$(date +%Y-%m-%d\ %H:%M:%S)
+cat > source/_posts/welcome-to-my-blog.md << EOF
+---
+title: 欢迎来到我的博客
+date: $FIRST_POST_DATE
+author: $BLOG_DIR
+img: /medias/featureimages/1.jpg
+top: true
+cover: true
+coverImg: /medias/featureimages/1.jpg
+summary: 这是我使用 Hexo 和 windsay 主题创建的第一篇博客文章。
+categories: 博客
+tags:
+  - Hexo
+  - windsay
+  - 开始
+---
+
+# 欢迎来到我的博客！
+
+这是使用 **Hexo** 静态博客框架和 **windsay** 主题创建的第一篇文章。
+
+## 关于这个博客
+
+- 🚀 使用 Hexo 静态站点生成器
+- 🎨 采用 windsay Material Design 主题
+- ☁️ 部署在 Cloudflare Pages
+- 🔄 通过 GitHub Actions 自动部署
+
+## 快速开始
+
+### 创建新文章
+
+\`\`\`bash
+npm run new "文章标题"
+# 或
+npx hexo new "文章标题"
+\`\`\`
+
+### 本地预览
+
+\`\`\`bash
+npm run server
+# 访问 http://localhost:4000
+\`\`\`
+
+### 生成静态文件
+
+\`\`\`bash
+npm run build
+\`\`\`
+
+## 下一步
+
+你可以：
+
+1. 📝 编辑 \`_config.yml\` 修改网站信息
+2. 🎨 编辑 \`source/_data/theme_config.yml\` 自定义主题
+3. ✍️ 在 \`source/_posts/\` 目录创建更多文章
+4. 🖼️ 添加图片到 \`source/medias/\` 目录
+5. 👥 编辑 \`source/_data/friends.json\` 添加友情链接
+
+## 更多资源
+
+- [Hexo 文档](https://hexo.io/zh-cn/docs/)
+- [windsay 主题文档](https://github.com/yorelll/windsay)
+- [Cloudflare Pages 文档](https://developers.cloudflare.com/pages/)
+
+祝你写作愉快！🎉
+EOF
+
+echo "✅ 已创建第一篇文章: source/_posts/welcome-to-my-blog.md"
+
 echo ""
-echo "2️⃣  主题作为子模块"
-echo "   • windsay 主题已作为 git 子模块添加到 themes/windsay"
-echo "   • 可独立更新主题，不影响博客内容"
-echo "   • 主题更新命令: cd themes/windsay && git pull origin main"
+echo "🔧 初始化 Git 仓库并准备提交..."
+# 如果还没有初始化 git
+if [ ! -d ".git" ]; then
+    git init
+    echo "✅ 已初始化 Git 仓库"
+fi
+
+# 添加所有文件
+git add .
+echo "✅ 已添加所有文件到 Git"
+
+# 创建初始提交
+git commit -m "Initial commit: Setup Hexo blog with windsay theme
+
+- Configure blog with domain: https://$DOMAIN
+- Add windsay theme as git submodule
+- Initialize hero section configuration
+- Create first welcome article
+- Setup GitHub Actions for auto-deployment to Cloudflare Pages
+- Project name: $BLOG_DIR
+"
+echo "✅ 已创建初始提交"
+
+# 设置默认分支为 main
+git branch -M main
+echo "✅ 已设置默认分支为 main"
+
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🎉 博客设置完成！"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "🚀 接下来的步骤:"
-echo "1. cd $BLOG_DIR"
-echo "2. 编辑 _config.yml 修改网站信息和域名"
-echo "3. 编辑 .github/workflows/deploy.yml 修改 Cloudflare 项目名"
+echo "📊 已完成的工作:"
+echo "  ✅ 创建 Hexo 博客项目结构"
+echo "  ✅ 安装所有必要的依赖包"
+echo "  ✅ 添加 windsay 主题作为 Git 子模块"
+echo "  ✅ 配置博客基本信息和域名: https://$DOMAIN"
+echo "  ✅ 初始化 Hero 区域配置"
+echo "  ✅ 创建第一篇欢迎文章"
+echo "  ✅ 创建必要页面 (分类、标签、关于、友链)"
+echo "  ✅ 配置 GitHub Actions 自动部署"
+echo "  ✅ 初始化 Git 并创建初始提交"
 echo ""
-echo "4. 在 GitHub 创建博客仓库（例如: windsay-blog）"
-echo "   访问: https://github.com/new"
-echo "   • 仓库名称: windsay-blog（推荐）或其他名称"
-echo "   • 设置为 Public"
-echo "   • 不要初始化 README、.gitignore 或 license"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🚀 接下来的必要步骤（请按顺序完成）:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "5. 设置 GitHub Secrets"
-echo "   仓库 Settings → Secrets and variables → Actions"
-echo "   添加: CLOUDFLARE_API_TOKEN 和 CLOUDFLARE_ACCOUNT_ID"
+echo "步骤 1️⃣: 在 GitHub 创建远程仓库"
+echo "────────────────────────────────────────────────"
+echo "  1. 访问: https://github.com/new"
+echo "  2. ⚠️  仓库名称必须填写: $BLOG_DIR"
+echo "     (必须与本地目录名一致！)"
+echo "  3. 设置为 Public（Cloudflare Pages 免费版要求）"
+echo "  4. ❌ 不要初始化 README、.gitignore 或 license"
+echo "  5. 点击 'Create repository'"
 echo ""
-echo "6. 提交并推送到 GitHub"
-echo "   git add ."
-echo "   git commit -m \"Initial commit: Setup Hexo blog with windsay theme\""
-echo "   git branch -M main"
-echo "   git remote add origin https://github.com/你的用户名/windsay-blog.git"
-echo "   git push -u origin main"
+echo "步骤 2️⃣: 配置 Cloudflare Pages"
+echo "────────────────────────────────────────────────"
+echo "  1. 访问: https://dash.cloudflare.com/"
+echo "  2. 进入 'Workers & Pages' > 'Pages'"
+echo "  3. 点击 'Create application' > 'Pages'"
+echo "  4. ⚠️  项目名称必须填写: $BLOG_DIR"
+echo "     (必须与仓库名一致！)"
+echo "  5. 如果已经创建项目，确保项目名正确"
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "步骤 3️⃣: 获取 Cloudflare API 凭据"
+echo "────────────────────────────────────────────────"
+echo "  API Token:"
+echo "    1. 访问: https://dash.cloudflare.com/profile/api-tokens"
+echo "    2. 点击 'Create Token'"
+echo "    3. 使用 'Edit Cloudflare Workers' 模板"
+echo "    4. 或创建自定义 token，权限: Account.Cloudflare Pages = Edit"
+echo "    5. 复制生成的 token"
 echo ""
-echo "💡 常用命令:"
-echo "• 本地预览: npx hexo server 或 npm run server"
-echo "• 访问: http://localhost:4000"
-echo "• 创建新文章: npx hexo new \"文章标题\" 或 npm run new \"文章标题\""
-echo "• 清理缓存: npx hexo clean 或 npm run clean"
-echo "• 生成静态文件: npx hexo generate 或 npm run build"
+echo "  Account ID:"
+echo "    1. 访问: https://dash.cloudflare.com/"
+echo "    2. 选择你的域名"
+echo "    3. 在右侧找到 'Account ID' 并复制"
 echo ""
-echo "🧹 清理和维护:"
-echo "• 清理依赖和临时文件: bash $THEME_DIR/examples/cleanup.sh"
-echo "  （释放磁盘空间，保留文章和配置）"
+echo "步骤 4️⃣: 配置 GitHub Secrets"
+echo "────────────────────────────────────────────────"
+echo "  1. 访问: https://github.com/<你的用户名>/$BLOG_DIR/settings/secrets/actions"
+echo "  2. 点击 'New repository secret'"
+echo "  3. 添加以下两个 secrets:"
+echo "     - Name: CLOUDFLARE_API_TOKEN"
+echo "       Value: [粘贴你的 API Token]"
+echo "     - Name: CLOUDFLARE_ACCOUNT_ID"
+echo "       Value: [粘贴你的 Account ID]"
 echo ""
-echo "📖 详细文档:"
-echo "• 部署指南: $THEME_DIR/DEPLOYMENT_GUIDE_CN.md"
-echo "• 主题更新指南: $THEME_DIR/THEME_UPDATE_GUIDE.md"
-echo "• 文档索引: $THEME_DIR/DOCUMENTATION_INDEX.md"
+echo "步骤 5️⃣: 推送代码到 GitHub"
+echo "────────────────────────────────────────────────"
+echo "  执行以下命令（请替换 <你的用户名>）:"
+echo ""
+echo "  cd $BLOG_DIR"
+echo "  git remote add origin https://github.com/<你的用户名>/$BLOG_DIR.git"
+echo "  git push -u origin main"
+echo ""
+echo "  推送后 GitHub Actions 将自动:"
+echo "    • 构建你的博客"
+echo "    • 部署到 Cloudflare Pages"
+echo "    • 你的博客将在 https://$DOMAIN 可访问"
+echo ""
+echo "步骤 6️⃣: 配置自定义域名（可选）"
+echo "────────────────────────────────────────────────"
+echo "  如果 $DOMAIN 是你的自定义域名:"
+echo "  1. 在 Cloudflare Pages 项目设置中添加自定义域名"
+echo "  2. 按照提示配置 DNS 记录"
+echo "  3. 等待 DNS 生效（通常几分钟）"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "💡 本地开发和更新"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "常用命令:"
+echo "  • 本地预览:      npm run server"
+echo "    然后访问:      http://localhost:4000"
+echo "  • 创建新文章:    npm run new \"文章标题\""
+echo "  • 清理缓存:      npm run clean"
+echo "  • 生成静态文件:  npm run build"
+echo ""
+echo "自定义博客（使用 update.sh 脚本）:"
+echo "  博客创建后，你可以使用 update.sh 脚本来自定义:"
+echo "  • 修改博客配置（站点信息、主题设置等）"
+echo "  • 更换主题样式和颜色"
+echo "  • 添加/修改博客内容"
+echo ""
+echo "  update.sh 脚本位置: $THEME_DIR/examples/update.sh"
+echo "  使用方法请查看: $THEME_DIR/examples/README.md"
+echo ""
+echo "发布更新到博客:"
+echo "  1. 编辑文件（配置、文章等）"
+echo "  2. git add ."
+echo "  3. git commit -m \"更新说明\""
+echo "  4. git push"
+echo "  5. GitHub Actions 将自动重新部署"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📖 文档资源"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "  • 完整部署指南:   $THEME_DIR/DEPLOYMENT_GUIDE_CN.md"
+echo "  • 主题更新指南:   $THEME_DIR/THEME_UPDATE_GUIDE.md"
+echo "  • 文档索引:       $THEME_DIR/DOCUMENTATION_INDEX.md"
+echo "  • 示例配置:       $THEME_DIR/examples/"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "⚠️  重要提醒"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "  ⚡ 仓库名称必须一致:"
+echo "     本地目录名 = GitHub 仓库名 = Cloudflare 项目名 = $BLOG_DIR"
+echo ""
+echo "  🌐 域名配置:"
+echo "     博客配置域名:  https://$DOMAIN"
+echo "     请确保在 Cloudflare Pages 中配置相同的域名"
+echo ""
+echo "  🔑 不要忘记设置 GitHub Secrets:"
+echo "     CLOUDFLARE_API_TOKEN 和 CLOUDFLARE_ACCOUNT_ID"
+echo "     否则自动部署将失败"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "祝你写作愉快！🎉"
 echo ""

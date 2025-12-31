@@ -10,12 +10,31 @@ QQ 交流群1（已满）: [`926552981`](https://jq.qq.com/?_wv=1027&k=5zMDYHT) 
 
 ## 📚 Cloudflare Pages 部署文档
 
-本主题提供完整的 Cloudflare Pages 部署方案，支持一键发布！
+本主题提供完整的 Cloudflare Pages 部署方案，支持**增强版一键设置**！
 
 **👉 [查看完整文档索引](DOCUMENTATION_INDEX.md)** 了解所有可用文档
 
-**快速链接**:
-- 🚀 [快速开始](examples/quick-start.sh) - 一键设置博客
+**快速开始（推荐）**:
+```bash
+# 一条命令创建完整博客，包含域名配置
+bash examples/quick-start.sh windsay-blog blog.example.com
+```
+
+增强版快速开始脚本将：
+- ✅ 创建完整的 Hexo 博客结构
+- ✅ 配置域名和站点信息
+- ✅ 初始化 hero 区域
+- ✅ 创建第一篇欢迎文章
+- ✅ 设置 GitHub Actions 自动部署
+- ✅ 准备好可推送的 Git 仓库
+
+**你只需要做**:
+1. 创建 GitHub 仓库（名称必须一致：`windsay-blog`）
+2. 添加 Cloudflare API 密钥到 GitHub Secrets
+3. 推送代码 - 博客自动上线！
+
+**其他资源**:
+- 🔄 [更新脚本](examples/update.sh) - 设置后管理和自定义博客
 - 📖 [完整部署指南](DEPLOYMENT_GUIDE_CN.md) - 详细步骤
 - ✅ [部署检查清单](DEPLOYMENT_CHECKLIST.md) - 确保不漏步骤
 - 🔧 [主题更新指南](THEME_UPDATE_GUIDE.md) - 主题更新和维护
@@ -716,11 +735,26 @@ $('.bg-cover').css('background-image', 'url(/medias/banner/' + new Date().getDay
 **快速开始**:
 
 ```bash
-# 使用快速开始脚本
-bash examples/quick-start.sh my-hexo-blog
+# 使用增强版快速开始脚本 (v2.0)
+bash examples/quick-start.sh windsay-blog blog.example.com
 
-# 或手动设置，参见完整指南
+# 这将创建一个完整的可部署博客！
 ```
+
+**包含内容**:
+- ✅ 完整的 Hexo 博客和 windsay 主题
+- ✅ 域名和站点配置
+- ✅ Hero 区域初始化
+- ✅ 第一篇欢迎文章
+- ✅ GitHub Actions 自动部署
+- ✅ 准备好推送的 Git 仓库
+
+**你的步骤**:
+1. 创建 GitHub 仓库（名称：`windsay-blog`）
+2. 添加 Cloudflare 密钥到 GitHub
+3. 推送代码 → 博客上线！
+
+设置后的自定义，请使用 [更新脚本](examples/update.sh)
 
 ### [Vercel 部署](https://blog.17lai.site/posts/5311b619/#vercel-%E9%83%A8%E7%BD%B2)
 

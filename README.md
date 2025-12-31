@@ -8,12 +8,31 @@
 
 ## 📚 Cloudflare Pages Deployment
 
-This theme provides complete Cloudflare Pages deployment solution with one-click publishing!
+This theme provides complete Cloudflare Pages deployment solution with **enhanced one-click setup**!
 
 **👉 [View Complete Documentation Index](DOCUMENTATION_INDEX.md)** for all available guides
 
-**Quick Links**:
-- 🚀 [Quick Start Script](examples/quick-start.sh) - Automated setup
+**Quick Start (Recommended)**:
+```bash
+# One command to create a complete blog with domain configuration
+bash examples/quick-start.sh windsay-blog blog.example.com
+```
+
+The enhanced quick-start script will:
+- ✅ Create complete Hexo blog structure
+- ✅ Configure domain and site information
+- ✅ Initialize hero section
+- ✅ Create your first welcome post
+- ✅ Setup GitHub Actions for auto-deployment
+- ✅ Prepare Git repository ready to push
+
+**What you need to do**:
+1. Create a GitHub repository (name must match: `windsay-blog`)
+2. Add Cloudflare API credentials to GitHub Secrets
+3. Push the code - your blog goes live automatically!
+
+**Additional Resources**:
+- 🔄 [Update Script](examples/update.sh) - Manage and customize your blog after setup
 - 📖 [Full Deployment Guide](DEPLOYMENT_GUIDE_CN.md) - Detailed steps (Chinese)
 - ✅ [Deployment Checklist](DEPLOYMENT_CHECKLIST.md) - Don't miss any steps
 - 🔧 [Theme Update Guide](THEME_UPDATE_GUIDE.md) - Update and maintain the theme
@@ -695,10 +714,25 @@ This theme provides a complete Cloudflare Pages deployment guide with one-click 
 **Quick Start**:
 
 ```bash
-# Using the quick start script
-bash examples/quick-start.sh my-hexo-blog
+# Using the enhanced quick start script (v2.0)
+bash examples/quick-start.sh windsay-blog blog.example.com
 
-# Or manual setup, see the complete guide
+# This will create a complete blog ready to deploy!
 ```
+
+**What's included**:
+- ✅ Complete Hexo blog with windsay theme
+- ✅ Domain and site configuration
+- ✅ Hero section initialization
+- ✅ First welcome post
+- ✅ GitHub Actions auto-deployment
+- ✅ Git repository ready to push
+
+**Your steps**:
+1. Create GitHub repo (name: `windsay-blog`)
+2. Add Cloudflare secrets to GitHub
+3. Push code → Blog goes live!
+
+For customization after setup, use the [update script](examples/update.sh)
 
 For other deployment options, please refer to the [Chinese README](README_CN.md).
