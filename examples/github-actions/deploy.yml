@@ -3,8 +3,8 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches:
-      - main  # 修改为你的默认分支名称（main 或 master）
-  workflow_dispatch:  # 允许手动触发
+      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -14,8 +14,8 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
       with:
-        submodules: true  # 重要：拉取主题子模块
-        fetch-depth: 0    # 获取所有历史记录
+        submodules: true
+        fetch-depth: 0
     
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -31,13 +31,39 @@ jobs:
       run: |
         npm run build
     
+    - name: Create Cloudflare Pages project if not exists
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      run: |
+        # 安装必要的工具
+        sudo apt-get update && sudo apt-get install -y curl jq
+        
+        PROJECT_NAME="windsay-blog"
+        
+        # 检查项目是否存在
+        response=$(curl -s -X GET \
+          -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+          "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME" || echo "{}")
+        
+        if echo "$response" | jq -e '.success == true' > /dev/null 2>&1; then
+          echo "Project already exists"
+        else
+          echo "Creating new project..."
+          curl -s -X POST \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data '{"name":"'"$PROJECT_NAME"'","production_branch":"main"}' \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects"
+          echo "Project created successfully"
+        fi
+    
     - name: Publish to Cloudflare Pages
       uses: cloudflare/pages-action@v1
       with:
         apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        projectName: windsay-blog  # 修改为你的 Cloudflare Pages 项目名
+        projectName: windsay-blog
         directory: public
         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
         branch: main
-        wranglerVersion: '3'
