@@ -30,10 +30,15 @@
 **📖 详细说明**: 查看 [Quick Start v2.0 功能说明](QUICK_START_V2.md)
 
 **✨ v2.0 新特性**:
+- ✅ **环境依赖检查**: 自动检查 git, node (>= 16), npm
+- ✅ **错误处理**: 使用 `set -euo pipefail` 确保脚本健壮性
 - ✅ 域名参数必填，自动配置到博客中
 - ✅ 自动初始化 Hero 区域配置
 - ✅ 自动创建第一篇欢迎文章
 - ✅ 自动进行 git commit，准备推送
+- ✅ **非空仓库支持**: 提供强制推送选项用于重新部署
+- ✅ **GitHub Actions 权限提醒**: 提示配置工作流读写权限
+- ✅ **自定义域名支持**: 提醒设置 CUSTOM_DOMAIN 仓库变量
 - ✅ 智能提醒：仓库名称必须一致
 - ✅ 详细的后续步骤指导
 
@@ -41,11 +46,13 @@
 
 ```bash
 # 基本用法：指定博客目录名和域名
-bash examples/quick-start.sh <博客目录名> <域名>
+bash examples/quick-start.sh <博客目录名> <域名> [远程仓库URL]
 
-# 示例
+# 示例 - 不带远程仓库URL（稍后手动推送）
 bash examples/quick-start.sh windsay-blog blog.windsay.qzz.io
-bash examples/quick-start.sh my-hexo-blog blog.example.com
+
+# 示例 - 带远程仓库URL（自动推送）
+bash examples/quick-start.sh my-hexo-blog blog.example.com https://github.com/yourname/my-hexo-blog.git
 
 # 进入博客目录
 cd windsay-blog
@@ -61,43 +68,50 @@ npm run new "文章标题"
 - ⚠️ 博客目录名必须与 GitHub 仓库名一致
 - ⚠️ 博客目录名必须与 Cloudflare Pages 项目名一致
 - ⚠️ 域名格式：`blog.example.com`（不要包含 `https://`）
+- ⚠️ 需要 Node.js >= 16（脚本会自动检查）
 
 **脚本完成的工作**:
-1. ✅ 创建 Hexo 博客项目结构
-2. ✅ 安装所有必要的依赖包
-3. ✅ 添加 windsay 主题作为 Git 子模块
-4. ✅ 配置博客信息（标题、域名等）
-5. ✅ 初始化 Hero 区域配置
-6. ✅ 创建第一篇欢迎文章
-7. ✅ 创建必要页面（分类、标签、关于、友链）
-8. ✅ 配置 GitHub Actions 自动部署
-9. ✅ 初始化 Git 并创建初始提交
+1. ✅ 检查环境依赖（git, node >= 16, npm）
+2. ✅ 创建 Hexo 博客项目结构
+3. ✅ 安装所有必要的依赖包
+4. ✅ 添加 windsay 主题作为 Git 子模块
+5. ✅ 配置博客信息（标题、域名等）
+6. ✅ 初始化 Hero 区域配置
+7. ✅ 创建第一篇欢迎文章
+8. ✅ 创建必要页面（分类、标签、关于、友链）
+9. ✅ 配置 GitHub Actions 自动部署
+10. ✅ 初始化 Git 并创建初始提交
 
 **你需要完成的步骤**:
 1. 在 GitHub 创建仓库（名称必须与目录名一致）
-2. 设置 Cloudflare API 凭据到 GitHub Secrets
-3. 推送代码到 GitHub
-4. 等待自动部署完成
+2. **配置 GitHub Actions 权限**（Settings → Actions → General → "Read and write permissions"）
+3. 设置 Cloudflare API 凭据到 GitHub Secrets
+4. （可选）设置 CUSTOM_DOMAIN 仓库变量用于自动域名配置
+5. 推送代码到 GitHub
+6. 等待自动部署完成
 
-### update.sh - 博客更新和管理工具 (新增)
+### update.sh - 博客更新和管理工具
 
 用于管理和自定义已创建的博客，提供交互式菜单操作。
 
 **功能特性**:
 
-📝 **内容管理**:
+📝 **博客内容管理**:
 - 创建新文章
+- **✨ 编辑已发布文章**（新增）
+- **✨ 删除已发布文章**（带确认，新增）
 - 创建和发布草稿
 - 列出所有文章
+- **✨ 搜索文章**（按关键词，新增）
 
-⚙️ **配置更新**:
+⚙️ **博客配置**:
 - 修改博客基本信息
-- 修改域名配置
-- 自定义主题配置（Hero、音乐、颜色等）
+- **✨ 修改域名配置（可同步到 Cloudflare Pages）**（增强）
 - 更新友情链接
 
 🎨 **主题管理**:
-- 更新 windsay 主题到最新版本
+- **✨ 更新 windsay 主题到最新版本（带 git stash 保护）**（增强）
+- 自定义主题配置（Hero、音乐、颜色等）
 - 查看主题版本信息
 
 🚀 **部署和发布**:
@@ -107,7 +121,7 @@ npm run new "文章标题"
 
 🔧 **维护工具**:
 - 清理缓存和临时文件
-- 重新安装依赖
+- **✨ 重新安装依赖（保留 package-lock.json）**（改进）
 - 查看博客统计信息
 
 **使用方法:**
@@ -127,14 +141,30 @@ bash examples/update.sh /path/to/your/blog
 **使用场景**:
 
 创建博客后，使用 update.sh 来：
-- 📝 添加新文章
+- 📝 添加、编辑、删除文章
+- 🔍 搜索已发布的文章
 - ⚙️ 修改配置（标题、域名、主题设置）
+- 🌐 更新域名并同步到 Cloudflare Pages
 - 🎨 自定义主题（颜色、Hero、音乐）
+- 🔄 安全更新主题（自动备份本地修改）
 - 👥 管理友情链接
 - 🚀 发布更新到线上
 
+**新特性详解**:
+
+1. **编辑已发布文章**: 交互式选择文章进行编辑
+2. **删除文章**: 安全删除，需输入 "yes" 确认
+3. **搜索文章**: 在所有文章中搜索关键词，显示匹配的行
+4. **域名同步**: 修改域名时可选择同步到 Cloudflare Pages
+5. **主题更新保护**: 
+   - 自动检测本地修改
+   - 提供暂存/放弃/取消三种选项
+   - 更新后自动恢复暂存的修改
+   - 冲突时提供详细解决指导
+6. **改进的依赖管理**: 重装依赖时保留 package-lock.json
+
 **交互式菜单**:
-脚本提供友好的交互式菜单，选择对应数字即可执行操作，适合不熟悉命令行的用户。
+脚本提供友好的交互式菜单，选择对应数字即可执行操作，适合不熟悉命令行的用户。所有脚本都使用 `set -euo pipefail` 确保健壮性。
 
 ### cleanup.sh - 清理博客资源
 
@@ -153,16 +183,27 @@ bash examples/cleanup.sh my-hexo-blog
 
 **清理内容:**
 - ✅ node_modules/ - npm 依赖包
-- ✅ package-lock.json / yarn.lock - 依赖锁文件
+- ✅ yarn.lock / pnpm-lock.yaml - 其他包管理器的锁文件
 - ✅ public/ - 生成的静态文件
 - ✅ db.json - Hexo 数据库
 - ✅ .deploy_git/ - 部署缓存
+- ✅ .hexo/ - Hexo 缓存目录
 
 **保留内容:**
 - ✅ source/ - 你的文章和页面
 - ✅ themes/ - 主题文件
 - ✅ _config.yml - 配置文件
 - ✅ package.json - 项目配置
+- ✅ **package-lock.json - 依赖锁定文件（重要！）**
+- ✅ .git/ - Git 仓库信息
+- ✅ .github/ - GitHub Actions 配置
+
+**特点:**
+- ✅ 安全检查：防止删除系统关键目录
+- ✅ 验证目录：确保是 Hexo 项目
+- ✅ 友好提示：显示将要删除和保留的内容
+- ✅ 用户确认：需要手动确认才执行删除
+- ✅ 错误处理：使用 `set -euo pipefail`
 
 ## 使用方法
 

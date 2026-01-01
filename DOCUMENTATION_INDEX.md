@@ -164,28 +164,47 @@
 自动化设置脚本：
 
 - **功能**：
-  - 创建博客目录
-  - 安装所有依赖
-  - 正确配置 package.json（包含 hexo.version 字段）
-  - 添加便捷的 npm scripts
-  - 添加主题子模块
-  - 复制配置文件
-  - 创建必要页面
-  - 初始化 Git
-- **用法**：`bash quick-start.sh my-blog-name`
-- **更新**：修复了 hexo 命令不可用的问题，现在所有命令都能正常工作
+  - ✅ 检查环境依赖（git, node >= 16, npm）
+  - ✅ 创建博客目录
+  - ✅ 安装所有依赖
+  - ✅ 正确配置 package.json（包含 hexo.version 字段）
+  - ✅ 添加便捷的 npm scripts
+  - ✅ 添加主题子模块
+  - ✅ 复制配置文件
+  - ✅ 创建必要页面
+  - ✅ 初始化 Git
+  - ✅ 支持非空远程仓库（强制推送选项）
+  - ✅ GitHub Actions 权限配置提醒
+  - ✅ 自定义域名自动配置支持
+- **用法**：`bash quick-start.sh <博客目录名> <域名> [远程仓库URL]`
+- **更新**：v2.0 版本，包含完整的依赖检查和错误处理
+
+### examples/update.sh
+
+博客内容和配置管理脚本：
+
+- **功能**：
+  - 📝 **内容管理**：创建、编辑、删除、搜索文章
+  - ⚙️ **配置管理**：修改博客信息、域名（可同步到 Cloudflare）
+  - 🎨 **主题管理**：更新主题（带 git stash 保护）、查看版本
+  - 🚀 **部署**：本地预览、构建、提交推送
+  - 🔧 **维护**：清理缓存、重装依赖、查看统计
+- **用法**：在博客目录运行 `bash /path/to/update.sh`
+- **更新**：重新组织菜单，新增编辑/删除/搜索文章功能，域名 Cloudflare 同步
 
 ### examples/cleanup.sh
 
 清理脚本，用于释放磁盘空间：
 
 - **功能**：
-  - 删除 node_modules 和 package-lock.json
+  - 删除 node_modules
+  - 删除 yarn.lock 和 pnpm-lock.yaml
   - 删除生成的 public 目录
   - 删除 Hexo 缓存文件
+  - ✅ **保留 package-lock.json**（确保依赖版本一致）
   - 保留文章、配置和主题
 - **用法**：`bash cleanup.sh /path/to/blog`
-- **特点**：安全的清理，保留重要文件
+- **特点**：安全的清理，保留重要文件，带 set -euo pipefail 错误处理
 
 ## 🔄 典型使用流程
 
