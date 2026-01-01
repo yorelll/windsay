@@ -255,6 +255,8 @@ SCAFFOLD
 echo ""
 echo "🎨 添加 windsay 主题..."
 
+CLONE_OPTION=""
+
 # 询问用户是否使用镜像站（适用于中国大陆用户）
 # 支持环境变量 CLONE_OPTION 以便自动化脚本使用
 if [ -z "$CLONE_OPTION" ]; then
