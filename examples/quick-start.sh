@@ -8,8 +8,6 @@
 # - windsay 主题将作为 git 子模块添加
 # - 你需要创建一个新的 GitHub 仓库来存放博客内容（例如: windsay-blog）
 
-set -euo pipefail
-
 # 定义依赖列表
 DEPENDENCIES=("git" "node" "npm")
 
