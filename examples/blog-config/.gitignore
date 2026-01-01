@@ -12,5 +12,7 @@ public/
 *~
 .deploy_git/
 .history
+# 注意：保留 package-lock.json 以确保依赖版本一致
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml

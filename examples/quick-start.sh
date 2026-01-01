@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Hexo 博客快速设置脚本 v2.0
 # 用于快速创建一个新的 Hexo 博客项目，使用 windsay 主题
@@ -8,7 +8,52 @@
 # - windsay 主题将作为 git 子模块添加
 # - 你需要创建一个新的 GitHub 仓库来存放博客内容（例如: windsay-blog）
 
-set -e
+set -euo pipefail
+
+# 定义依赖列表
+DEPENDENCIES=("git" "node" "npm")
+
+echo "🔍 检查环境依赖..."
+echo ""
+
+# 循环检查依赖
+for cmd in "${DEPENDENCIES[@]}"; do
+    if ! command -v "$cmd" &> /dev/null; then
+        echo -e "\033[31m[错误] 未检测到命令: $cmd\033[0m"
+        echo "请先安装 $cmd 后再运行此脚本"
+        echo ""
+        echo "安装提示："
+        case "$cmd" in
+            git)
+                echo "  • macOS: brew install git"
+                echo "  • Ubuntu/Debian: sudo apt-get install git"
+                echo "  • 官网: https://git-scm.com/"
+                ;;
+            node|npm)
+                echo "  • 推荐使用 nvm 安装 Node.js: https://github.com/nvm-sh/nvm"
+                echo "  • 或访问官网: https://nodejs.org/"
+                ;;
+        esac
+        exit 1
+    fi
+    echo "✅ 已检测到: $cmd ($(command -v "$cmd"))"
+done
+
+echo ""
+
+# 检查 Node.js 版本（建议 >= 16）
+NODE_VERSION=$(node -v | sed 's/v//' | cut -d. -f1)
+if [ "$NODE_VERSION" -lt 16 ]; then
+    echo -e "\033[31m[错误] Node.js 版本过低: v$NODE_VERSION，建议升级到 v16 或更高版本\033[0m"
+    echo ""
+    echo "升级方法："
+    echo "  • 使用 nvm: nvm install 18 && nvm use 18"
+    echo "  • 或访问官网下载: https://nodejs.org/"
+    exit 1
+fi
+
+echo "✅ Node.js 版本: v$NODE_VERSION (符合要求)"
+echo ""
 
 # 配置变量
 THEME_REPO_HTTPS="https://github.com/yorelll/windsay"
@@ -506,6 +551,16 @@ if [ -z "$REMOTE_REPO" ]; then
     echo "     • CLOUDFLARE_ACCOUNT_ID"
     echo "     • 在仓库的 Settings > Secrets and variables > Actions 中添加"
     echo ""
+    echo "  4️⃣ 配置 GitHub Actions 权限 ⚠️  重要！"
+    echo "     • 访问仓库 Settings → Actions → General → Workflow permissions"
+    echo "     • 勾选 \"Read and write permissions\""
+    echo "     • 否则 GitHub Actions 无法创建 Cloudflare Pages 项目"
+    echo ""
+    echo "  5️⃣ （可选）配置自定义域名"
+    echo "     • 在仓库 Settings → Secrets and variables → Variables 中"
+    echo "     • 添加变量 CUSTOM_DOMAIN，值为: $DOMAIN"
+    echo "     • GitHub Actions 将自动配置 Cloudflare Pages 域名"
+    echo ""
     read -p "是否已完成以上配置？(y/n) " -n 1 -r
     echo ""
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -591,13 +646,62 @@ else
     fi
 fi
 
+# 检查远程仓库是否为空
+echo ""
+echo "🔍 检查远程仓库状态..."
+if git ls-remote "$REMOTE_REPO" HEAD &>/dev/null; then
+    echo "⚠️  检测到远程仓库非空"
+    echo ""
+    echo "这通常发生在以下情况："
+    echo "  • 之前的部署失败，远程仓库已有内容"
+    echo "  • 仓库创建时自动初始化了 README 或 .gitignore"
+    echo ""
+    echo "选项："
+    echo "  1. 强制覆盖远程仓库内容（推荐用于重新部署）"
+    echo "  2. 取消操作（手动处理后重试）"
+    echo ""
+    read -p "请选择 [1/2]: " choice
+    
+    if [ "$choice" = "1" ]; then
+        echo ""
+        echo "⚠️  将使用强制推送覆盖远程仓库内容"
+        FORCE_PUSH=true
+    else
+        echo ""
+        echo "已取消。请手动清理远程仓库后重试。"
+        echo ""
+        echo "清理方法："
+        echo "  1. 删除远程仓库"
+        echo "  2. 重新创建一个空仓库（不要初始化任何文件）"
+        echo "  3. 重新运行此脚本"
+        exit 1
+    fi
+else
+    echo "✅ 远程仓库为空，可以推送"
+    FORCE_PUSH=false
+fi
+
 # 推送到远程仓库
 echo ""
 echo "📤 推送代码到远程仓库..."
 echo "   这可能需要几分钟时间..."
 echo ""
 
-if git push -u origin main; then
+if [ "$FORCE_PUSH" = true ]; then
+    if git push -u origin main --force; then
+        PUSH_SUCCESS=true
+    else
+        PUSH_SUCCESS=false
+    fi
+else
+    if git push -u origin main; then
+        PUSH_SUCCESS=true
+    else
+        PUSH_SUCCESS=false
+    fi
+fi
+
+if [ "$PUSH_SUCCESS" = true ]; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "🎉 推送成功！"

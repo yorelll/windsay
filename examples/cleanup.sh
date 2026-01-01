@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Hexo 博客清理脚本
 # 用于清理由 quick-start.sh 创建的 Hexo 博客项目
@@ -9,7 +9,7 @@
 #
 # 警告: 此操作不可逆，请确保已备份重要内容！
 
-set -e
+set -euo pipefail
 
 echo "🧹 Hexo 博客清理脚本"
 echo "=========================="
@@ -64,7 +64,7 @@ echo ""
 echo "⚠️  此脚本将删除以下内容:"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "• node_modules/ - npm 依赖包"
-echo "• package-lock.json / yarn.lock - 依赖锁文件"
+echo "• yarn.lock / pnpm-lock.yaml - 其他包管理器的锁文件"
 echo "• public/ - 生成的静态文件"
 echo "• db.json - Hexo 数据库"
 echo "• .deploy_git/ - 部署缓存"
@@ -77,6 +77,7 @@ echo "• themes/ - 主题文件（包括 git 子模块）"
 echo "• _config.yml - 配置文件"
 echo "• scaffolds/ - 文章模板"
 echo "• package.json - 项目配置（保留以便重新安装）"
+echo "• package-lock.json - 依赖锁定文件（保留以确保版本一致）"
 echo "• .git/ - Git 仓库信息"
 echo "• .github/ - GitHub Actions 配置"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -105,18 +106,21 @@ else
     echo "⏭️  跳过 node_modules (不存在)"
 fi
 
-# 删除 package-lock.json
-if [ -f "$TARGET_DIR/package-lock.json" ]; then
-    echo "🗑️  删除 package-lock.json..."
-    rm -f "$TARGET_DIR/package-lock.json"
-    echo "✅ 已删除 package-lock.json"
-fi
+# 注意：保留 package-lock.json 以确保依赖版本一致
+echo "⏭️  保留 package-lock.json (依赖锁定文件)"
 
 # 删除 yarn.lock
 if [ -f "$TARGET_DIR/yarn.lock" ]; then
     echo "🗑️  删除 yarn.lock..."
     rm -f "$TARGET_DIR/yarn.lock"
     echo "✅ 已删除 yarn.lock"
+fi
+
+# 删除 pnpm-lock.yaml
+if [ -f "$TARGET_DIR/pnpm-lock.yaml" ]; then
+    echo "🗑️  删除 pnpm-lock.yaml..."
+    rm -f "$TARGET_DIR/pnpm-lock.yaml"
+    echo "✅ 已删除 pnpm-lock.yaml"
 fi
 
 # 删除 public 目录
