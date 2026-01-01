@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Hexo 博客更新脚本
 # 用于帮助用户自定义和更新博客内容
@@ -7,7 +7,7 @@
 # 1. 在博客目录内运行: bash /path/to/update.sh
 # 2. 或从主题目录运行: bash examples/update.sh /path/to/blog
 
-set -e
+set -euo pipefail
 
 echo "🔄 Hexo 博客更新助手"
 echo "===================="
@@ -50,31 +50,34 @@ show_menu() {
     echo "请选择要执行的操作:"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    echo "📝 内容管理:"
+    echo "📝 博客内容管理:"
     echo "  1. 创建新文章"
-    echo "  2. 创建草稿"
-    echo "  3. 发布草稿"
-    echo "  4. 列出所有文章"
+    echo "  2. 编辑已发布文章"
+    echo "  3. 删除已发布文章"
+    echo "  4. 创建草稿"
+    echo "  5. 发布草稿"
+    echo "  6. 列出所有文章"
+    echo "  7. 搜索文章"
     echo ""
-    echo "⚙️  配置更新:"
-    echo "  5. 修改博客基本信息（标题、作者、描述等）"
-    echo "  6. 修改域名配置"
-    echo "  7. 自定义主题配置（Hero、音乐、颜色等）"
-    echo "  8. 更新友情链接"
+    echo "⚙️  博客配置:"
+    echo "  8. 修改博客基本信息（标题、作者、描述等）"
+    echo "  9. 修改域名配置（同步到 Cloudflare）"
+    echo "  10. 更新友情链接"
     echo ""
     echo "🎨 主题管理:"
-    echo "  9. 更新 windsay 主题到最新版本"
-    echo "  10. 查看主题版本信息"
+    echo "  11. 自定义主题配置（Hero、音乐、颜色等）"
+    echo "  12. 更新 windsay 主题到最新版本"
+    echo "  13. 查看主题版本信息"
     echo ""
     echo "🚀 部署和发布:"
-    echo "  11. 本地预览博客"
-    echo "  12. 构建静态文件"
-    echo "  13. 提交并推送更新到 GitHub（触发自动部署）"
+    echo "  14. 本地预览博客"
+    echo "  15. 构建静态文件"
+    echo "  16. 提交并推送更新到 GitHub"
     echo ""
     echo "🔧 维护工具:"
-    echo "  14. 清理缓存和临时文件"
-    echo "  15. 重新安装依赖"
-    echo "  16. 查看博客统计信息"
+    echo "  17. 清理缓存和临时文件"
+    echo "  18. 重新安装依赖"
+    echo "  19. 查看博客统计信息"
     echo ""
     echo "  0. 退出"
     echo ""
@@ -147,6 +150,107 @@ list_posts() {
     fi
 }
 
+# 编辑已发布文章
+edit_post() {
+    echo ""
+    echo "📝 选择要编辑的文章:"
+    
+    if [ ! -d "source/_posts" ] || [ -z "$(ls -A source/_posts/*.md 2>/dev/null)" ]; then
+        echo "   (没有文章可编辑)"
+        return
+    fi
+    
+    # 使用 select 命令创建菜单
+    PS3="请输入文章编号: "
+    select post in source/_posts/*.md "取消"; do
+        if [ "$post" = "取消" ]; then
+            echo "已取消"
+            return
+        elif [ -n "$post" ]; then
+            echo ""
+            echo "正在编辑: $(basename "$post")"
+            ${EDITOR:-nano} "$post"
+            echo "✅ 文章已保存"
+            break
+        else
+            echo "❌ 无效选择，请重试"
+        fi
+    done
+}
+
+# 删除已发布文章
+delete_post() {
+    echo ""
+    echo "🗑️  选择要删除的文章:"
+    
+    if [ ! -d "source/_posts" ] || [ -z "$(ls -A source/_posts/*.md 2>/dev/null)" ]; then
+        echo "   (没有文章可删除)"
+        return
+    fi
+    
+    # 使用 select 命令创建菜单
+    PS3="请输入文章编号: "
+    select post in source/_posts/*.md "取消"; do
+        if [ "$post" = "取消" ]; then
+            echo "已取消"
+            return
+        elif [ -n "$post" ]; then
+            echo ""
+            echo "⚠️  你确定要删除以下文章吗？"
+            echo "   文件: $(basename "$post")"
+            echo "   此操作不可逆！"
+            echo ""
+            read -p "确定删除？输入 yes 确认: " confirm
+            if [ "$confirm" = "yes" ]; then
+                rm "$post"
+                echo "✅ 文章已删除: $(basename "$post")"
+            else
+                echo "已取消删除"
+            fi
+            break
+        else
+            echo "❌ 无效选择，请重试"
+        fi
+    done
+}
+
+# 搜索文章
+search_posts() {
+    echo ""
+    read -p "🔍 请输入搜索关键词: " keyword
+    
+    if [ -z "$keyword" ]; then
+        echo "❌ 关键词不能为空"
+        return
+    fi
+    
+    echo ""
+    echo "搜索结果（包含 \"$keyword\" 的文章）:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    
+    if [ -d "source/_posts" ]; then
+        found=0
+        for file in source/_posts/*.md; do
+            if [ -f "$file" ] && grep -qi "$keyword" "$file"; then
+                echo "📄 $(basename "$file")"
+                # 显示匹配的行（最多3行）
+                grep -in "$keyword" "$file" | head -3 | sed 's/^/   /'
+                echo ""
+                found=$((found + 1))
+            fi
+        done
+        
+        if [ $found -eq 0 ]; then
+            echo "   (未找到匹配的文章)"
+        else
+            echo "总计找到 $found 篇文章"
+        fi
+    else
+        echo "   (没有文章)"
+    fi
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+}
+
 # 修改博客基本信息
 update_blog_info() {
     echo ""
@@ -190,8 +294,70 @@ update_domain() {
         sed -i "s|^url:.*|url: $new_domain|" _config.yml
     fi
     echo "✅ 域名已更新为: $new_domain"
+    
+    # 询问是否同步到 Cloudflare Pages
     echo ""
-    echo "⚠️  注意: 请确保在 Cloudflare Pages 中也配置了相同的域名"
+    echo "🌐 是否同步域名到 Cloudflare Pages？"
+    echo "   注意：需要配置 CLOUDFLARE_API_TOKEN 和 CLOUDFLARE_ACCOUNT_ID 环境变量"
+    echo ""
+    read -p "同步到 Cloudflare？[y/N]: " sync_cf
+    
+    if [[ "$sync_cf" =~ ^[Yy]$ ]]; then
+        if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo ""
+            echo "❌ 缺少 Cloudflare 凭据"
+            echo ""
+            echo "请设置环境变量后重试："
+            echo "  export CLOUDFLARE_API_TOKEN=your_token"
+            echo "  export CLOUDFLARE_ACCOUNT_ID=your_account_id"
+            echo ""
+            echo "或者通过 GitHub Actions 的仓库变量 CUSTOM_DOMAIN 来自动配置"
+            return
+        fi
+        
+        PROJECT_NAME=$(basename "$(pwd)")
+        # 提取纯域名（去除 https:// 和尾部斜杠）
+        DOMAIN=$(echo "$new_domain" | sed 's|https://||' | sed 's|http://||' | sed 's|/$||')
+        
+        echo ""
+        echo "正在添加自定义域名到 Cloudflare Pages..."
+        
+        # 添加自定义域名
+        response=$(curl -s -X POST \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data '{"name":"'"$DOMAIN"'"}' \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/domains")
+        
+        if echo "$response" | grep -q '"success":true'; then
+            echo "✅ 域名已同步到 Cloudflare Pages"
+            echo ""
+            echo "📝 下一步操作："
+            echo "   请在 Cloudflare DNS 中添加 CNAME 记录："
+            echo "   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "   类型: CNAME"
+            echo "   名称: $DOMAIN"
+            echo "   内容: $PROJECT_NAME.pages.dev"
+            echo "   代理: 已代理（橙色云朵）"
+            echo "   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        else
+            echo "⚠️  同步失败，请手动在 Cloudflare 控制台配置"
+            error_msg=$(echo "$response" | grep -o '"message":"[^"]*"' | head -1 | cut -d'"' -f4)
+            if [ -n "$error_msg" ]; then
+                echo "   错误信息: $error_msg"
+            fi
+            echo ""
+            echo "手动配置方法："
+            echo "  1. 访问 Cloudflare Pages 控制台"
+            echo "  2. 选择项目 $PROJECT_NAME"
+            echo "  3. 进入 Custom domains 设置"
+            echo "  4. 添加域名 $DOMAIN"
+        fi
+    else
+        echo ""
+        echo "💡 提示：可以稍后通过 GitHub 推送代码触发自动部署"
+        echo "   如果配置了 CUSTOM_DOMAIN 仓库变量，将自动同步域名"
+    fi
 }
 
 # 自定义主题配置
@@ -256,14 +422,115 @@ update_theme() {
     echo ""
     echo "🔄 更新 windsay 主题..."
     
-    if [ -d "themes/windsay/.git" ]; then
-        cd themes/windsay
-        git pull origin main
-        cd ../..
-        echo "✅ 主题已更新到最新版本"
-    else
+    THEME_DIR="themes/windsay"
+    
+    if [ ! -d "$THEME_DIR/.git" ]; then
         echo "⚠️  主题不是通过 git 子模块安装的"
         echo "   请手动下载最新版本: https://github.com/yorelll/windsay"
+        return
+    fi
+    
+    cd "$THEME_DIR" || return
+    
+    # 检查是否有未提交的更改
+    if [[ -n $(git status -s) ]]; then
+        echo "⚠️  检测到主题目录有本地修改："
+        echo ""
+        git status -s
+        echo ""
+        echo "选项："
+        echo "  1. 暂存本地更改后更新（推荐）"
+        echo "  2. 放弃本地更改并更新"
+        echo "  3. 取消更新"
+        echo ""
+        read -p "请选择 [1/2/3]: " choice
+        
+        case $choice in
+            1)
+                echo ""
+                echo "📦 暂存本地更改..."
+                git stash save "Auto-backup-before-update-$(date +%Y%m%d-%H%M%S)"
+                STASHED=1
+                ;;
+            2)
+                echo ""
+                echo "⚠️  放弃本地更改..."
+                read -p "确认放弃所有本地修改？输入 yes 确认: " confirm
+                if [ "$confirm" = "yes" ]; then
+                    git checkout -- .
+                    git clean -fd
+                    STASHED=0
+                else
+                    echo "已取消更新"
+                    cd ../.. || return
+                    return
+                fi
+                ;;
+            *)
+                echo "已取消更新"
+                cd ../.. || return
+                return
+                ;;
+        esac
+    else
+        STASHED=0
+    fi
+    
+    # 执行更新
+    echo ""
+    echo "📥 拉取最新代码..."
+    if git pull origin main; then
+        echo "✅ 主题已更新到最新版本"
+    else
+        echo "❌ 更新失败"
+        if [ "$STASHED" = "1" ]; then
+            echo ""
+            echo "正在恢复本地更改..."
+            git stash pop
+        fi
+        cd ../.. || return
+        return
+    fi
+    
+    # 恢复暂存的更改
+    if [ "$STASHED" = "1" ]; then
+        echo ""
+        echo "📦 恢复本地更改..."
+        if git stash pop; then
+            echo "✅ 本地更改已恢复"
+        else
+            echo ""
+            echo "⚠️  恢复时发生冲突，请手动解决"
+            echo ""
+            echo "冲突解决步骤："
+            echo "  1. 查看冲突文件: git status"
+            echo "  2. 编辑冲突文件，解决冲突标记"
+            echo "  3. 标记已解决: git add <文件>"
+            echo "  4. 完成恢复: git reset"
+            echo ""
+            echo "或者放弃恢复："
+            echo "  git stash drop"
+            echo ""
+            echo "暂存的更改列表: git stash list"
+        fi
+    fi
+    
+    cd ../.. || return
+    
+    # 提示配置迁移
+    if [ -f "$THEME_DIR/_config.yml" ] && [ ! -f "source/_data/theme_config.yml" ]; then
+        echo ""
+        echo "💡 建议：将主题配置移动到 source/_data/theme_config.yml"
+        echo "   这样更新主题时不会覆盖你的配置"
+        echo ""
+        read -p "是否现在创建自定义主题配置？(y/n) " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            mkdir -p source/_data
+            cp "$THEME_DIR/_config.yml" source/_data/theme_config.yml
+            echo "✅ 已创建 source/_data/theme_config.yml"
+            echo "   你可以在此文件中进行主题自定义配置"
+        fi
     fi
 }
 
@@ -347,9 +614,20 @@ clean_cache() {
 # 重新安装依赖
 reinstall_deps() {
     echo ""
+    echo "⚠️  重新安装依赖将删除 node_modules"
+    echo "   package-lock.json 将被保留以确保版本一致"
+    echo ""
+    read -p "确认继续？(y/n) " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "已取消"
+        return
+    fi
+    
+    echo ""
     echo "📦 重新安装依赖..."
     echo "   这可能需要几分钟时间..."
-    rm -rf node_modules package-lock.json
+    rm -rf node_modules
     npm install
     echo "✅ 依赖已重新安装"
 }
@@ -389,32 +667,35 @@ show_stats() {
 while true; do
     echo ""
     show_menu
-    read -p "请选择 [0-16]: " choice
+    read -p "请选择 [0-19]: " choice
     
     case $choice in
         1) create_new_post ;;
-        2) create_draft ;;
-        3) publish_draft ;;
-        4) list_posts ;;
-        5) update_blog_info ;;
-        6) update_domain ;;
-        7) customize_theme ;;
-        8) update_friends ;;
-        9) update_theme ;;
-        10) show_theme_version ;;
-        11) preview_blog ;;
-        12) build_blog ;;
-        13) commit_and_push ;;
-        14) clean_cache ;;
-        15) reinstall_deps ;;
-        16) show_stats ;;
+        2) edit_post ;;
+        3) delete_post ;;
+        4) create_draft ;;
+        5) publish_draft ;;
+        6) list_posts ;;
+        7) search_posts ;;
+        8) update_blog_info ;;
+        9) update_domain ;;
+        10) update_friends ;;
+        11) customize_theme ;;
+        12) update_theme ;;
+        13) show_theme_version ;;
+        14) preview_blog ;;
+        15) build_blog ;;
+        16) commit_and_push ;;
+        17) clean_cache ;;
+        18) reinstall_deps ;;
+        19) show_stats ;;
         0) 
             echo ""
             echo "👋 再见！"
             exit 0
             ;;
         *)
-            echo "❌ 无效的选择，请输入 0-16"
+            echo "❌ 无效的选择，请输入 0-19"
             ;;
     esac
     

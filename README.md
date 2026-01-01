@@ -22,21 +22,28 @@ bash examples/quick-start.sh windsay-blog blog.example.com https://github.com/yo
 ```
 
 The enhanced quick-start script will:
+- ✅ **Check dependencies** (git, node, npm) and Node.js version (>= 16)
 - ✅ Create complete Hexo blog structure
 - ✅ Configure domain and site information
 - ✅ Initialize hero section
 - ✅ Create your first welcome post (from template)
 - ✅ Setup GitHub Actions for auto-deployment
+- ✅ **Support non-empty repositories** (force push option for re-deployment)
 - ✅ Prepare Git repository ready to push
 - ✅ Optionally push to GitHub automatically
 
 **What you need to do**:
 1. Create a GitHub repository (name must match: `windsay-blog`)
 2. Add Cloudflare API credentials to GitHub Secrets
-3. Run the script - your blog goes live automatically (if using auto-push)!
+3. **Configure GitHub Actions permissions** (Settings → Actions → General → "Read and write permissions")
+4. (Optional) Add repository variable `CUSTOM_DOMAIN` for automatic domain configuration
+5. Run the script - your blog goes live automatically (if using auto-push)!
 
 **Additional Resources**:
-- 🔄 [Update Script](examples/update.sh) - Manage and customize your blog after setup
+- 🔄 [Update Script](examples/update.sh) - Comprehensive blog management (content, theme, deployment)
+  - ✨ Edit, delete, and search posts
+  - 🌐 Sync domain to Cloudflare Pages
+  - 🎨 Update theme with git stash protection
 - 📖 [Full Deployment Guide](DEPLOYMENT_GUIDE_CN.md) - Detailed steps (Chinese)
 - ✅ [Deployment Checklist](DEPLOYMENT_CHECKLIST.md) - Don't miss any steps
 - 🔧 [Theme Update Guide](THEME_UPDATE_GUIDE.md) - Update and maintain the theme
@@ -705,14 +712,17 @@ See [CHANGELOG.md](https://github.com/blinkfox/hexo-theme-matery/blob/master/CHA
 This theme provides a complete Cloudflare Pages deployment guide with one-click publishing support:
 
 - 📖 **[Complete Deployment Guide](DEPLOYMENT_GUIDE_CN.md)** - Detailed step-by-step instructions (Chinese)
-- 🚀 **[Quick Start Script](examples/quick-start.sh)** - Automated setup tool
+- 🚀 **[Quick Start Script](examples/quick-start.sh)** - Automated setup tool with dependency checking
+- 🔄 **[Update Script](examples/update.sh)** - Comprehensive blog management tool
 - 📋 **[Example Configuration Files](examples/)** - Blog config and GitHub Actions templates
 
 **Features**:
 - ✅ Auto-deploy on `git push`
 - ✅ Global CDN acceleration
 - ✅ Free SSL certificates
-- ✅ Custom domain support
+- ✅ Custom domain support with automatic configuration
+- ✅ Non-empty repository support (force push for re-deployment)
+- ✅ Git stash protection for theme updates
 - ✅ Pull Request preview deployments
 
 **Quick Start**:
@@ -728,19 +738,33 @@ bash examples/quick-start.sh windsay-blog blog.example.com https://github.com/yo
 ```
 
 **What's included**:
+- ✅ Dependency checking (git, node >= 16, npm)
 - ✅ Complete Hexo blog with windsay theme
 - ✅ Domain and site configuration
 - ✅ Hero section initialization
 - ✅ First welcome post (from template)
-- ✅ GitHub Actions auto-deployment
+- ✅ GitHub Actions auto-deployment with custom domain support
 - ✅ Git repository ready to push
-- ✅ Optional automatic push to GitHub
+- ✅ package-lock.json preserved for consistent dependencies
 
 **Your steps**:
 1. Create GitHub repo (name: `windsay-blog`)
 2. Add Cloudflare secrets to GitHub
-3. Run script → Blog goes live (if using auto-push)!
+3. **Configure GitHub Actions permissions** (Settings → Actions → "Read and write permissions")
+4. (Optional) Add `CUSTOM_DOMAIN` repository variable for automatic domain setup
+5. Run script → Blog goes live (if using auto-push)!
 
-For customization after setup, use the [update script](examples/update.sh)
+**After Setup - Use the Update Script**:
+
+```bash
+cd windsay-blog
+bash ../windsay/examples/update.sh
+```
+
+The update script provides:
+- 📝 **Content Management**: Create, edit, delete, search posts
+- ⚙️ **Configuration**: Modify blog info, update domain (with Cloudflare sync)
+- 🎨 **Theme Management**: Update theme with automatic git stash protection
+- 🚀 **Deployment**: Preview, build, commit and push updates
 
 For other deployment options, please refer to the [Chinese README](README_CN.md).

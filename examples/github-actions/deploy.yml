@@ -67,3 +67,41 @@ jobs:
         directory: public
         gitHubToken: ${{ secrets.GITHUB_TOKEN }}
         branch: main
+    
+    - name: Configure Custom Domain
+      if: vars.CUSTOM_DOMAIN != ''
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        CUSTOM_DOMAIN: ${{ vars.CUSTOM_DOMAIN }}
+      run: |
+        PROJECT_NAME="windsay-blog"
+        
+        echo "配置自定义域名: $CUSTOM_DOMAIN"
+        
+        # 检查域名是否已经配置
+        existing_domains=$(curl -s -X GET \
+          -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+          "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/domains" | jq -r '.result[].name' || echo "")
+        
+        if echo "$existing_domains" | grep -q "^$CUSTOM_DOMAIN$"; then
+          echo "域名 $CUSTOM_DOMAIN 已配置，跳过"
+        else
+          # 添加自定义域名到 Cloudflare Pages
+          response=$(curl -s -X POST \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data '{"name":"'"$CUSTOM_DOMAIN"'"}' \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$PROJECT_NAME/domains")
+          
+          if echo "$response" | jq -e '.success == true' > /dev/null 2>&1; then
+            echo "✅ 域名已添加到 Cloudflare Pages"
+            echo "📝 请在 Cloudflare DNS 中添加 CNAME 记录："
+            echo "   类型: CNAME"
+            echo "   名称: $CUSTOM_DOMAIN"
+            echo "   内容: $PROJECT_NAME.pages.dev"
+          else
+            echo "⚠️ 域名配置失败，请手动在 Cloudflare 控制台配置"
+            echo "响应: $(echo "$response" | jq -r '.errors[0].message' || echo "$response")"
+          fi
+        fi

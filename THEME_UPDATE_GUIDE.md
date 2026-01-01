@@ -44,9 +44,33 @@ Windsay 采用主题与内容分离的架构：
 
 ## 更新主题
 
-### 方法一：在博客项目中更新主题子模块
+### 方法一：使用 update.sh 脚本（推荐）⭐
 
-如果主题仓库已有更新，你可以在博客项目中更新主题：
+最简单和最安全的方式是使用 `update.sh` 脚本，它提供了自动的 git stash 保护：
+
+```bash
+# 在博客根目录执行
+cd my-hexo-blog
+bash ../windsay/examples/update.sh
+# 选择菜单选项 12：更新 windsay 主题到最新版本
+```
+
+**脚本自动处理**：
+- ✅ 检测主题目录是否有本地修改
+- ✅ 如果有修改，提供三个选项：
+  1. 暂存本地更改后更新（推荐）- 自动使用 git stash
+  2. 放弃本地更改并更新
+  3. 取消更新
+- ✅ 执行主题更新
+- ✅ 自动恢复暂存的更改
+- ✅ 如果恢复时有冲突，提供详细的解决指导
+- ✅ 提示是否需要迁移主题配置到 `source/_data/theme_config.yml`
+
+### 方法二：在博客项目中手动更新主题子模块
+
+如果主题仓库已有更新，你可以在博客项目中手动更新主题：
+
+**注意**：手动更新前建议先备份或暂存本地修改！
 
 ```bash
 # 进入博客项目目录
@@ -55,8 +79,17 @@ cd my-hexo-blog
 # 进入主题目录
 cd themes/windsay
 
+# 检查是否有本地修改
+git status
+
+# 如果有本地修改，建议先暂存
+git stash save "Backup before theme update"
+
 # 拉取最新的主题更新
 git pull origin main
+
+# 恢复暂存的修改（如果之前暂存了）
+git stash pop
 
 # 返回博客根目录
 cd ../..
@@ -67,7 +100,7 @@ git commit -m "Update windsay theme to latest version"
 git push origin main
 ```
 
-### 方法二：使用一行命令更新所有子模块
+### 方法三：使用一行命令更新所有子模块
 
 ```bash
 # 在博客根目录执行
@@ -82,13 +115,14 @@ git push origin main
 ### 查看主题版本
 
 ```bash
-# 进入主题目录
+# 使用 update.sh 脚本
+cd my-hexo-blog
+bash ../windsay/examples/update.sh
+# 选择菜单选项 13：查看主题版本信息
+
+# 或手动查看
 cd themes/windsay
-
-# 查看当前版本
 git log -1 --oneline
-
-# 查看所有可用的标签版本
 git tag -l
 ```
 

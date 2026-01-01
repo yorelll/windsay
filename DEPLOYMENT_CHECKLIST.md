@@ -6,23 +6,37 @@
 
 - [ ] 已有 GitHub 账号
 - [ ] 已有 Cloudflare 账号
-- [ ] 域名 `blog.windsay.qzz.io` 已在 Cloudflare 托管
-- [ ] 本地已安装 Node.js (推荐 v18)
+- [ ] 域名 `blog.windsay.qzz.io` 已在 Cloudflare 托管（或准备使用 pages.dev 子域名）
+- [ ] 本地已安装 Node.js (推荐 v18，最低 v16)
 - [ ] 本地已安装 Git
+- [ ] 本地已安装 npm
 
 ## 第一步：创建博客仓库
 
 - [ ] 在 GitHub 创建新的公开仓库（如 `my-hexo-blog`）
-- [ ] 不要初始化 README、.gitignore 或 license
+- [ ] **不要初始化 README、.gitignore 或 license**（保持仓库为空）
 - [ ] 记录仓库 URL
+
+**注意**：如果仓库已有内容，快速开始脚本支持强制覆盖选项
 
 ## 第二步：本地设置博客
 
 ### 使用快速开始脚本（推荐）
 
 - [ ] 克隆 windsay 主题仓库或下载 `examples/quick-start.sh`
-- [ ] 运行脚本：`bash quick-start.sh my-hexo-blog`
+- [ ] 运行脚本：`bash quick-start.sh <博客目录名> <域名> [远程仓库URL]`
+  - 示例：`bash quick-start.sh my-blog blog.example.com https://github.com/yourname/my-blog.git`
+- [ ] 脚本将自动检查环境依赖（git, node >= 16, npm）
 - [ ] 等待安装完成
+
+**脚本自动完成的任务**：
+- ✅ 验证环境依赖和 Node.js 版本
+- ✅ 创建博客结构和安装依赖
+- ✅ 配置域名和基本信息
+- ✅ 添加主题作为 git 子模块
+- ✅ 创建必要页面
+- ✅ 初始化 Git 仓库
+- ✅ 创建初始提交
 
 ### 手动设置（高级用户）
 
@@ -61,13 +75,23 @@
   - [ ] 在域名页面右侧栏找到 Account ID
   - [ ] 复制 Account ID
 
-## 第六步：配置 GitHub Secrets
+## 第六步：配置 GitHub Secrets 和权限
 
 - [ ] 在 GitHub 仓库进入 Settings → Secrets and variables → Actions
 - [ ] 添加 Secret：`CLOUDFLARE_API_TOKEN`
   - [ ] 粘贴你的 Cloudflare API Token
 - [ ] 添加 Secret：`CLOUDFLARE_ACCOUNT_ID`
   - [ ] 粘贴你的 Cloudflare Account ID
+- [ ] **⚠️ 重要：配置 GitHub Actions 权限**
+  - [ ] 进入 Settings → Actions → General → Workflow permissions
+  - [ ] 勾选 "Read and write permissions"
+  - [ ] 否则 GitHub Actions 无法创建 Cloudflare Pages 项目
+- [ ] （可选）添加仓库变量 `CUSTOM_DOMAIN`
+  - [ ] 进入 Settings → Secrets and variables → Variables
+  - [ ] 点击 "New repository variable"
+  - [ ] 名称：`CUSTOM_DOMAIN`
+  - [ ] 值：你的域名（如 `blog.example.com`）
+  - [ ] GitHub Actions 将自动配置 Cloudflare Pages 域名
 
 ## 第七步：本地测试
 
