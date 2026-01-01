@@ -7,8 +7,6 @@
 # 1. 在博客目录内运行: bash /path/to/update.sh
 # 2. 或从主题目录运行: bash examples/update.sh /path/to/blog
 
-set -euo pipefail
-
 echo "🔄 Hexo 博客更新助手"
 echo "===================="
 echo ""
